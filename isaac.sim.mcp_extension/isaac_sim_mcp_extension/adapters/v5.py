@@ -53,13 +53,13 @@ class IsaacAdapterV5(IsaacAdapterBase):
         if not prim.IsValid():
             raise ValueError(f"Prim not found: {prim_path}")
         xformable = UsdGeom.Xformable(prim)
+        xformable.ClearXformOpOrder()
         if position is not None:
-            xformable.ClearXformOpOrder()
-            xformable.AddTranslateOp().Set(Gf.Vec3d(*position))
+            xformable.AddTranslateOp(precision=UsdGeom.XformOp.PrecisionDouble).Set(Gf.Vec3d(*position))
         if rotation is not None:
-            xformable.AddRotateXYZOp().Set(Gf.Vec3d(*rotation))
+            xformable.AddRotateXYZOp(precision=UsdGeom.XformOp.PrecisionDouble).Set(Gf.Vec3d(*rotation))
         if scale is not None:
-            xformable.AddScaleOp().Set(Gf.Vec3d(*scale))
+            xformable.AddScaleOp(precision=UsdGeom.XformOp.PrecisionDouble).Set(Gf.Vec3d(*scale))
 
     def get_prim_transform(self, prim_path: str) -> Dict[str, Any]:
         from pxr import UsdGeom, Gf
@@ -276,6 +276,9 @@ class IsaacAdapterV5(IsaacAdapterBase):
         omni.kit.commands.execute("CopyPrim", path_from=source_path, path_to=target_path)
 
     def import_urdf(self, urdf_path: str, prim_path: str = "/World/robot", **kwargs) -> Any:
+        import os
+        if not os.path.isfile(urdf_path):
+            raise FileNotFoundError(f"URDF file not found: {urdf_path}")
         import omni.kit.commands
         status, import_config = omni.kit.commands.execute("URDFCreateImportConfig")
         omni.kit.commands.execute("URDFParseFile", urdf_path=urdf_path, import_config=import_config)
