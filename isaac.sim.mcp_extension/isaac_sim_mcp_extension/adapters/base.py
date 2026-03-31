@@ -1,0 +1,217 @@
+"""Abstract base adapter for Isaac Sim version-specific APIs."""
+
+from abc import ABC, abstractmethod
+from typing import Any, Dict, List, Optional, Tuple
+
+
+class IsaacAdapterBase(ABC):
+    """Abstract interface that isolates all Isaac Sim version-specific API calls.
+
+    Handler code should never import isaacsim.* directly — use this adapter instead.
+    Each supported Isaac Sim version provides a concrete implementation.
+    """
+
+    # ── Scene ──────────────────────────────────────────────
+
+    @abstractmethod
+    def get_stage(self) -> Any:
+        """Return the current USD stage."""
+        ...
+
+    @abstractmethod
+    def get_assets_root_path(self) -> str:
+        """Return the root path for Isaac Sim built-in assets."""
+        ...
+
+    # ── Prims ──────────────────────────────────────────────
+
+    @abstractmethod
+    def create_prim(self, prim_path: str, prim_type: str = "Xform", **kwargs) -> Any:
+        """Create a USD prim at the given path."""
+        ...
+
+    @abstractmethod
+    def delete_prim(self, prim_path: str) -> bool:
+        """Delete a prim from the stage. Returns True on success."""
+        ...
+
+    @abstractmethod
+    def add_reference_to_stage(self, usd_path: str, prim_path: str) -> Any:
+        """Add a USD reference to the stage at prim_path."""
+        ...
+
+    @abstractmethod
+    def set_prim_transform(
+        self,
+        prim_path: str,
+        position: Optional[List[float]] = None,
+        rotation: Optional[List[float]] = None,
+        scale: Optional[List[float]] = None,
+    ) -> None:
+        """Set position, rotation, and/or scale on a prim."""
+        ...
+
+    @abstractmethod
+    def get_prim_transform(self, prim_path: str) -> Dict[str, Any]:
+        """Return position, rotation, scale of a prim."""
+        ...
+
+    @abstractmethod
+    def list_prims(self, root_path: str = "/", prim_type: Optional[str] = None) -> List[Dict[str, str]]:
+        """List prims under root_path, optionally filtered by type."""
+        ...
+
+    @abstractmethod
+    def get_prim_info(self, prim_path: str) -> Dict[str, Any]:
+        """Return detailed info about a prim (type, transform, properties)."""
+        ...
+
+    # ── Robots ─────────────────────────────────────────────
+
+    @abstractmethod
+    def create_xform_prim(self, prim_path: str) -> Any:
+        """Create an XFormPrim wrapper for positioning."""
+        ...
+
+    @abstractmethod
+    def create_articulation(self, prim_path: str, name: str) -> Any:
+        """Create an Articulation wrapper for a robot at prim_path."""
+        ...
+
+    @abstractmethod
+    def get_robot_joint_info(self, prim_path: str) -> Dict[str, Any]:
+        """Return joint names, DOF count, and current positions for a robot."""
+        ...
+
+    @abstractmethod
+    def set_joint_positions(
+        self, prim_path: str, positions: List[float], joint_indices: Optional[List[int]] = None
+    ) -> None:
+        """Set target joint positions on a robot articulation."""
+        ...
+
+    @abstractmethod
+    def get_joint_positions(self, prim_path: str) -> List[float]:
+        """Read current joint positions from a robot articulation."""
+        ...
+
+    # ── Physics ────────────────────────────────────────────
+
+    @abstractmethod
+    def create_world(self, **kwargs) -> Any:
+        """Create a World instance for simulation management."""
+        ...
+
+    @abstractmethod
+    def create_simulation_context(self, **kwargs) -> Any:
+        """Create a SimulationContext for physics stepping."""
+        ...
+
+    @abstractmethod
+    def create_physics_scene(self, gravity: Optional[List[float]] = None, scene_name: str = "PhysicsScene") -> Any:
+        """Create a physics scene prim with gravity settings."""
+        ...
+
+    # ── Sensors ────────────────────────────────────────────
+
+    @abstractmethod
+    def create_camera(self, prim_path: str, resolution: Tuple[int, int] = (1280, 720), **kwargs) -> Any:
+        """Create a camera sensor at prim_path."""
+        ...
+
+    @abstractmethod
+    def capture_camera_image(self, prim_path: str) -> Any:
+        """Capture an RGB image from a camera. Returns image data."""
+        ...
+
+    @abstractmethod
+    def create_lidar(self, prim_path: str, config: Optional[str] = None, **kwargs) -> Any:
+        """Create a lidar sensor at prim_path."""
+        ...
+
+    @abstractmethod
+    def get_lidar_point_cloud(self, prim_path: str) -> Any:
+        """Get point cloud data from a lidar sensor."""
+        ...
+
+    # ── Materials ──────────────────────────────────────────
+
+    @abstractmethod
+    def create_pbr_material(
+        self,
+        prim_path: str,
+        color: Optional[List[float]] = None,
+        roughness: float = 0.5,
+        metallic: float = 0.0,
+    ) -> Any:
+        """Create an OmniPBR material."""
+        ...
+
+    @abstractmethod
+    def create_physics_material(
+        self,
+        prim_path: str,
+        static_friction: float = 0.5,
+        dynamic_friction: float = 0.5,
+        restitution: float = 0.0,
+    ) -> Any:
+        """Create a physics material with friction/restitution."""
+        ...
+
+    @abstractmethod
+    def apply_material(self, material_path: str, target_prim_path: str) -> None:
+        """Bind a material to a prim."""
+        ...
+
+    # ── Lighting ───────────────────────────────────────────
+
+    @abstractmethod
+    def create_light(
+        self,
+        light_type: str,
+        prim_path: str,
+        intensity: float = 1000.0,
+        color: Optional[List[float]] = None,
+        **kwargs,
+    ) -> Any:
+        """Create a light prim (Distant, Dome, Sphere, Rect, Disk, Cylinder)."""
+        ...
+
+    @abstractmethod
+    def modify_light(self, prim_path: str, intensity: Optional[float] = None, color: Optional[List[float]] = None) -> None:
+        """Modify properties of an existing light."""
+        ...
+
+    # ── Assets ─────────────────────────────────────────────
+
+    @abstractmethod
+    def import_urdf(self, urdf_path: str, prim_path: str = "/World/robot", **kwargs) -> Any:
+        """Import a robot from a URDF file."""
+        ...
+
+    # ── Simulation ─────────────────────────────────────────
+
+    @abstractmethod
+    def play(self) -> None:
+        """Start the simulation."""
+        ...
+
+    @abstractmethod
+    def pause(self) -> None:
+        """Pause the simulation."""
+        ...
+
+    @abstractmethod
+    def stop(self) -> None:
+        """Stop the simulation."""
+        ...
+
+    @abstractmethod
+    def step(self, num_steps: int = 1) -> None:
+        """Step the simulation forward."""
+        ...
+
+    @abstractmethod
+    def execute_script(self, code: str) -> Dict[str, Any]:
+        """Execute arbitrary Python code in the Isaac Sim context."""
+        ...
