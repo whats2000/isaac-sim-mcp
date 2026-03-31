@@ -85,6 +85,14 @@ class IsaacAdapterBase(ABC):
         ...
 
     @abstractmethod
+    def discover_robots(self) -> Dict[str, Dict[str, str]]:
+        """Scan the asset server for available robot USD files.
+
+        Returns a dict mapping robot key to {"asset_path": ..., "description": ..., "manufacturer": ...}.
+        """
+        ...
+
+    @abstractmethod
     def get_robot_joint_info(self, prim_path: str) -> Dict[str, Any]:
         """Return joint names, DOF count, and current positions for a robot."""
         ...

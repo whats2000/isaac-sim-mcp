@@ -29,7 +29,7 @@ def test_adapter_base_has_all_abstract_methods():
         "create_prim", "delete_prim", "add_reference_to_stage",
         "set_prim_transform", "get_prim_transform", "list_prims", "get_prim_info",
         "create_xform_prim", "create_articulation",
-        "get_robot_joint_info", "set_joint_positions", "get_joint_positions",
+        "discover_robots", "get_robot_joint_info", "set_joint_positions", "get_joint_positions",
         "create_world", "create_simulation_context", "create_physics_scene",
         "create_camera", "capture_camera_image", "create_lidar", "get_lidar_point_cloud",
         "create_pbr_material", "create_physics_material", "apply_material",

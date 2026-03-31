@@ -12,10 +12,12 @@ def register_tools(mcp: FastMCP, get_connection: "Callable[[], IsaacConnection]"
 
     @mcp.tool("create_robot")
     def create_robot(robot_type: str = "franka", position: Optional[List[float]] = None, name: Optional[str] = None) -> str:
-        """Create a robot from the built-in library. Call create_physics_scene first.
+        """Create a robot in the scene. Supports fuzzy matching — e.g. "franka", "spot", "g1", "go1".
+        Call list_available_robots first to see all available robots discovered from the Isaac Sim asset server.
+        Call create_physics_scene before creating robots.
 
         Args:
-            robot_type: Robot type — franka, jetbot, carter, g1, or go1.
+            robot_type: Robot name or search term. Fuzzy matched against available robots.
             position: [x, y, z] world position.
             name: Custom name for the robot prim.
         """
@@ -31,10 +33,22 @@ def register_tools(mcp: FastMCP, get_connection: "Callable[[], IsaacConnection]"
 
     @mcp.tool("list_available_robots")
     def list_available_robots() -> str:
-        """List all available built-in robot types with descriptions."""
+        """List all available robots discovered from the Isaac Sim asset server.
+        Returns robot keys, descriptions, manufacturers, and asset paths.
+        The list is auto-discovered at startup and reflects the actual assets available in your Isaac Sim version."""
         try:
             conn = get_connection()
             result = conn.send_command("robots.list")
+            return json.dumps(result, indent=2)
+        except Exception as e:
+            return json.dumps({"status": "error", "message": str(e)})
+
+    @mcp.tool("refresh_robot_library")
+    def refresh_robot_library() -> str:
+        """Force re-scan the asset server for available robots. Use this if new robot assets were added."""
+        try:
+            conn = get_connection()
+            result = conn.send_command("robots.refresh")
             return json.dumps(result, indent=2)
         except Exception as e:
             return json.dumps({"status": "error", "message": str(e)})
