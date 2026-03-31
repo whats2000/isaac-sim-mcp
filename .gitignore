@@ -74,3 +74,4 @@ local_cache/
 
 # MCP specific
 mcp_cache/
+.coverage
