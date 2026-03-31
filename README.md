@@ -199,6 +199,60 @@ Open **Windsurf Settings > MCP** or edit `~/.codeium/windsurf/mcp_config.json`:
 
 JetBrains IDEs with MCP support read from a `mcpServers` block in their settings. Go to **Settings > Tools > AI Assistant > MCP Servers**, or add the server configuration manually. Refer to the [JetBrains MCP documentation](https://www.jetbrains.com/help/idea/model-context-protocol.html) for your specific IDE version.
 
+### Multiple Instances
+
+You can run multiple Isaac Sim sessions side by side. Each instance uses a different port — the launcher auto-assigns a free port starting from `8766`. To control each instance from your MCP client, add a separate server entry per instance with the `ISAAC_MCP_PORT` environment variable.
+
+#### Claude Code (CLI)
+
+```bash
+# First instance (default port 8766)
+claude mcp add isaac-sim /absolute/path/to/isaac-sim-mcp/scripts/run_mcp_server.sh
+
+# Second instance (port 8767)
+claude mcp add isaac-sim-2 -e ISAAC_MCP_PORT=8767 -- /absolute/path/to/isaac-sim-mcp/scripts/run_mcp_server.sh
+```
+
+#### Cursor / Claude Desktop / Windsurf
+
+Add multiple entries to your MCP config, each with a different `ISAAC_MCP_PORT`:
+
+```json
+{
+  "mcpServers": {
+    "isaac-sim": {
+      "command": "/absolute/path/to/isaac-sim-mcp/scripts/run_mcp_server.sh"
+    },
+    "isaac-sim-2": {
+      "command": "/absolute/path/to/isaac-sim-mcp/scripts/run_mcp_server.sh",
+      "env": {
+        "ISAAC_MCP_PORT": "8767"
+      }
+    }
+  }
+}
+```
+
+#### VS Code (Claude Code Extension)
+
+```json
+{
+  "servers": {
+    "isaac-sim": {
+      "command": "/absolute/path/to/isaac-sim-mcp/scripts/run_mcp_server.sh"
+    },
+    "isaac-sim-2": {
+      "command": "/absolute/path/to/isaac-sim-mcp/scripts/run_mcp_server.sh",
+      "env": {
+        "ISAAC_MCP_PORT": "8767"
+      }
+    }
+  }
+}
+```
+
+The port each Isaac Sim instance uses is printed in the terminal when launched and logged to `logs/mcp_server_<port>.log`.
+
 ## Desktop Launcher (Linux)
 
 You can install a separate **Isaac Sim MCP** application icon alongside the original Isaac Sim launcher.
