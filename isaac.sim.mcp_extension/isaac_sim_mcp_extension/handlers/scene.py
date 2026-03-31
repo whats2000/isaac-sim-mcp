@@ -46,14 +46,18 @@ def create_physics(adapter: IsaacAdapterBase, gravity: Optional[Sequence[float]]
 def clear(adapter: IsaacAdapterBase, keep_physics: bool = False) -> Dict[str, Any]:
     try:
         stage = adapter.get_stage()
-        root = stage.GetPrimAtPath("/World")
-        if root.IsValid():
-            children = root.GetAllChildren()
-            for child in children:
-                path = str(child.GetPath())
-                if keep_physics and "Physics" in path:
-                    continue
-                adapter.delete_prim(path)
+        # Prims to never delete (system prims)
+        keep_paths = {"/OmniverseKit_Persp", "/OmniverseKit_Front", "/OmniverseKit_Top",
+                      "/OmniverseKit_Right", "/Render", "/Environment"}
+        # Clear all root-level prims (robots created at root, etc.)
+        root_prim = stage.GetPseudoRoot()
+        for child in root_prim.GetChildren():
+            path = str(child.GetPath())
+            if path in keep_paths:
+                continue
+            if keep_physics and "Physics" in path:
+                continue
+            adapter.delete_prim(path)
         return {"status": "success", "message": "Scene cleared"}
     except Exception as e:
         return {"status": "error", "message": str(e)}
