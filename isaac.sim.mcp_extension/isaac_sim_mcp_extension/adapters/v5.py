@@ -1,9 +1,15 @@
 """Isaac Sim 5.1.0 adapter implementation."""
 
+from __future__ import annotations
+
 import traceback
-from typing import Any, Dict, List, Optional, Tuple
+import numpy as np
+from typing import Any, Dict, List, Optional, Sequence, Tuple, TYPE_CHECKING
 
 from .base import IsaacAdapterBase
+
+if TYPE_CHECKING:
+    from pxr import Usd
 
 
 class IsaacAdapterV5(IsaacAdapterBase):
@@ -11,7 +17,7 @@ class IsaacAdapterV5(IsaacAdapterBase):
 
     # ── Scene ──────────────────────────────────────────────
 
-    def get_stage(self):
+    def get_stage(self) -> Usd.Stage:
         import omni.usd
         return omni.usd.get_context().get_stage()
 
@@ -21,7 +27,7 @@ class IsaacAdapterV5(IsaacAdapterBase):
 
     # ── Prims ──────────────────────────────────────────────
 
-    def create_prim(self, prim_path: str, prim_type: str = "Xform", **kwargs):
+    def create_prim(self, prim_path: str, prim_type: str = "Xform", **kwargs) -> Usd.Prim:
         from isaacsim.core.utils.prims import create_prim
         return create_prim(prim_path, prim_type, **kwargs)
 
@@ -30,11 +36,17 @@ class IsaacAdapterV5(IsaacAdapterBase):
         omni.kit.commands.execute("DeletePrims", paths=[prim_path])
         return True
 
-    def add_reference_to_stage(self, usd_path: str, prim_path: str):
+    def add_reference_to_stage(self, usd_path: str, prim_path: str) -> Usd.Prim:
         from isaacsim.core.utils.stage import add_reference_to_stage
         return add_reference_to_stage(usd_path, prim_path)
 
-    def set_prim_transform(self, prim_path, position=None, rotation=None, scale=None):
+    def set_prim_transform(
+        self,
+        prim_path: str,
+        position: Optional[Sequence[float]] = None,
+        rotation: Optional[Sequence[float]] = None,
+        scale: Optional[Sequence[float]] = None,
+    ) -> None:
         from pxr import UsdGeom, Gf
         stage = self.get_stage()
         prim = stage.GetPrimAtPath(prim_path)
@@ -62,10 +74,10 @@ class IsaacAdapterV5(IsaacAdapterBase):
             "position": [translation[0], translation[1], translation[2]],
         }
 
-    def list_prims(self, root_path="/", prim_type=None):
+    def list_prims(self, root_path: str = "/", prim_type: Optional[str] = None) -> List[Dict[str, str]]:
         stage = self.get_stage()
         root = stage.GetPrimAtPath(root_path)
-        results = []
+        results: List[Dict[str, str]] = []
         for prim in root.GetAllChildren():
             ptype = prim.GetTypeName()
             if prim_type and ptype != prim_type:
@@ -89,11 +101,11 @@ class IsaacAdapterV5(IsaacAdapterBase):
 
     # ── Robots ─────────────────────────────────────────────
 
-    def create_xform_prim(self, prim_path):
+    def create_xform_prim(self, prim_path: str) -> Any:
         from isaacsim.core.prims import SingleXFormPrim
         return SingleXFormPrim(prim_path=prim_path)
 
-    def create_articulation(self, prim_path, name):
+    def create_articulation(self, prim_path: str, name: str) -> Any:
         from isaacsim.core.prims import SingleArticulation
         return SingleArticulation(prim_path=prim_path, name=name)
 
@@ -105,12 +117,19 @@ class IsaacAdapterV5(IsaacAdapterBase):
             "num_dof": art.num_dof if art.num_dof else 0,
         }
 
-    def set_joint_positions(self, prim_path, positions, joint_indices=None):
+    def set_joint_positions(
+        self,
+        prim_path: str,
+        positions: Sequence[float],
+        joint_indices: Optional[List[int]] = None,
+    ) -> None:
         from isaacsim.core.prims import SingleArticulation
         from isaacsim.core.utils.types import ArticulationAction
-        import numpy as np
         art = SingleArticulation(prim_path=prim_path)
-        action = ArticulationAction(joint_positions=np.array(positions), joint_indices=np.array(joint_indices) if joint_indices else None)
+        action = ArticulationAction(
+            joint_positions=np.array(positions),
+            joint_indices=np.array(joint_indices) if joint_indices else None,
+        )
         controller = art.get_articulation_controller()
         controller.apply_action(action)
 
@@ -122,15 +141,15 @@ class IsaacAdapterV5(IsaacAdapterBase):
 
     # ── Physics ────────────────────────────────────────────
 
-    def create_world(self, **kwargs):
+    def create_world(self, **kwargs) -> Any:
         from isaacsim.core.api import World
         return World(**kwargs)
 
-    def create_simulation_context(self, **kwargs):
+    def create_simulation_context(self, **kwargs) -> Any:
         from isaacsim.core.api import SimulationContext
         return SimulationContext(**kwargs)
 
-    def create_physics_scene(self, gravity=None, scene_name="PhysicsScene"):
+    def create_physics_scene(self, gravity: Optional[Sequence[float]] = None, scene_name: str = "PhysicsScene") -> str:
         import omni.kit.commands
         scene_path = f"/World/{scene_name}"
         omni.kit.commands.execute("CreatePrim", prim_path=scene_path, prim_type="PhysicsScene")
@@ -138,27 +157,33 @@ class IsaacAdapterV5(IsaacAdapterBase):
 
     # ── Sensors ────────────────────────────────────────────
 
-    def create_camera(self, prim_path, resolution=(1280, 720), **kwargs):
+    def create_camera(self, prim_path: str, resolution: Tuple[int, int] = (1280, 720), **kwargs) -> Any:
         from isaacsim.sensors.camera import Camera
         return Camera(prim_path=prim_path, resolution=resolution, **kwargs)
 
-    def capture_camera_image(self, prim_path):
+    def capture_camera_image(self, prim_path: str) -> np.ndarray:
         from isaacsim.sensors.camera import Camera
         cam = Camera(prim_path=prim_path)
         return cam.get_rgba()
 
-    def create_lidar(self, prim_path, config=None, **kwargs):
+    def create_lidar(self, prim_path: str, config: Optional[str] = None, **kwargs) -> Any:
         from isaacsim.sensors.rtx import LidarRtx
         return LidarRtx(prim_path=prim_path, config=config or "Example_Rotary", **kwargs)
 
-    def get_lidar_point_cloud(self, prim_path):
+    def get_lidar_point_cloud(self, prim_path: str) -> np.ndarray:
         from isaacsim.sensors.rtx import LidarRtx
         lidar = LidarRtx(prim_path=prim_path)
         return lidar.get_point_cloud()
 
     # ── Materials ──────────────────────────────────────────
 
-    def create_pbr_material(self, prim_path, color=None, roughness=0.5, metallic=0.0):
+    def create_pbr_material(
+        self,
+        prim_path: str,
+        color: Optional[Sequence[float]] = None,
+        roughness: float = 0.5,
+        metallic: float = 0.0,
+    ) -> Any:
         from pxr import UsdShade, Sdf, Gf
         stage = self.get_stage()
         material = UsdShade.Material.Define(stage, prim_path)
@@ -171,7 +196,13 @@ class IsaacAdapterV5(IsaacAdapterBase):
         material.CreateSurfaceOutput().ConnectToSource(shader.CreateOutput("surface", Sdf.ValueTypeNames.Token))
         return material
 
-    def create_physics_material(self, prim_path, static_friction=0.5, dynamic_friction=0.5, restitution=0.0):
+    def create_physics_material(
+        self,
+        prim_path: str,
+        static_friction: float = 0.5,
+        dynamic_friction: float = 0.5,
+        restitution: float = 0.0,
+    ) -> Any:
         from pxr import UsdPhysics
         stage = self.get_stage()
         material = UsdPhysics.MaterialAPI.Apply(stage.DefinePrim(prim_path))
@@ -180,7 +211,7 @@ class IsaacAdapterV5(IsaacAdapterBase):
         material.CreateRestitutionAttr(restitution)
         return material
 
-    def apply_material(self, material_path, target_prim_path):
+    def apply_material(self, material_path: str, target_prim_path: str) -> None:
         from pxr import UsdShade
         stage = self.get_stage()
         material = UsdShade.Material(stage.GetPrimAtPath(material_path))
@@ -189,7 +220,14 @@ class IsaacAdapterV5(IsaacAdapterBase):
 
     # ── Lighting ───────────────────────────────────────────
 
-    def create_light(self, light_type, prim_path, intensity=1000.0, color=None, **kwargs):
+    def create_light(
+        self,
+        light_type: str,
+        prim_path: str,
+        intensity: float = 1000.0,
+        color: Optional[Sequence[float]] = None,
+        **kwargs,
+    ) -> Any:
         from pxr import UsdLux, Gf
         stage = self.get_stage()
         light_classes = {
@@ -215,7 +253,12 @@ class IsaacAdapterV5(IsaacAdapterBase):
             self.set_prim_transform(prim_path, rotation=rotation)
         return light
 
-    def modify_light(self, prim_path, intensity=None, color=None):
+    def modify_light(
+        self,
+        prim_path: str,
+        intensity: Optional[float] = None,
+        color: Optional[Sequence[float]] = None,
+    ) -> None:
         from pxr import UsdLux, Gf
         stage = self.get_stage()
         prim = stage.GetPrimAtPath(prim_path)
@@ -228,7 +271,7 @@ class IsaacAdapterV5(IsaacAdapterBase):
 
     # ── Assets ─────────────────────────────────────────────
 
-    def import_urdf(self, urdf_path, prim_path="/World/robot", **kwargs):
+    def import_urdf(self, urdf_path: str, prim_path: str = "/World/robot", **kwargs) -> Any:
         import omni.kit.commands
         status, import_config = omni.kit.commands.execute("URDFCreateImportConfig")
         omni.kit.commands.execute("URDFParseFile", urdf_path=urdf_path, import_config=import_config)
@@ -242,19 +285,19 @@ class IsaacAdapterV5(IsaacAdapterBase):
 
     # ── Simulation ─────────────────────────────────────────
 
-    def play(self):
+    def play(self) -> None:
         import omni.timeline
         omni.timeline.get_timeline_interface().play()
 
-    def pause(self):
+    def pause(self) -> None:
         import omni.timeline
         omni.timeline.get_timeline_interface().pause()
 
-    def stop(self):
+    def stop(self) -> None:
         import omni.timeline
         omni.timeline.get_timeline_interface().stop()
 
-    def step(self, num_steps=1):
+    def step(self, num_steps: int = 1) -> None:
         import omni.kit.app
         for _ in range(num_steps):
             omni.kit.app.get_app().update()

@@ -1,7 +1,13 @@
 """Abstract base adapter for Isaac Sim version-specific APIs."""
 
+from __future__ import annotations
+
+import numpy as np
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Tuple
+
+if TYPE_CHECKING:
+    from pxr import Usd
 
 
 class IsaacAdapterBase(ABC):
@@ -14,7 +20,7 @@ class IsaacAdapterBase(ABC):
     # ── Scene ──────────────────────────────────────────────
 
     @abstractmethod
-    def get_stage(self) -> Any:
+    def get_stage(self) -> Usd.Stage:
         """Return the current USD stage."""
         ...
 
@@ -26,7 +32,7 @@ class IsaacAdapterBase(ABC):
     # ── Prims ──────────────────────────────────────────────
 
     @abstractmethod
-    def create_prim(self, prim_path: str, prim_type: str = "Xform", **kwargs) -> Any:
+    def create_prim(self, prim_path: str, prim_type: str = "Xform", **kwargs) -> Usd.Prim:
         """Create a USD prim at the given path."""
         ...
 
@@ -36,7 +42,7 @@ class IsaacAdapterBase(ABC):
         ...
 
     @abstractmethod
-    def add_reference_to_stage(self, usd_path: str, prim_path: str) -> Any:
+    def add_reference_to_stage(self, usd_path: str, prim_path: str) -> Usd.Prim:
         """Add a USD reference to the stage at prim_path."""
         ...
 
@@ -44,9 +50,9 @@ class IsaacAdapterBase(ABC):
     def set_prim_transform(
         self,
         prim_path: str,
-        position: Optional[List[float]] = None,
-        rotation: Optional[List[float]] = None,
-        scale: Optional[List[float]] = None,
+        position: Optional[Sequence[float]] = None,
+        rotation: Optional[Sequence[float]] = None,
+        scale: Optional[Sequence[float]] = None,
     ) -> None:
         """Set position, rotation, and/or scale on a prim."""
         ...
@@ -85,7 +91,7 @@ class IsaacAdapterBase(ABC):
 
     @abstractmethod
     def set_joint_positions(
-        self, prim_path: str, positions: List[float], joint_indices: Optional[List[int]] = None
+        self, prim_path: str, positions: Sequence[float], joint_indices: Optional[List[int]] = None
     ) -> None:
         """Set target joint positions on a robot articulation."""
         ...
@@ -108,7 +114,7 @@ class IsaacAdapterBase(ABC):
         ...
 
     @abstractmethod
-    def create_physics_scene(self, gravity: Optional[List[float]] = None, scene_name: str = "PhysicsScene") -> Any:
+    def create_physics_scene(self, gravity: Optional[Sequence[float]] = None, scene_name: str = "PhysicsScene") -> str:
         """Create a physics scene prim with gravity settings."""
         ...
 
@@ -120,7 +126,7 @@ class IsaacAdapterBase(ABC):
         ...
 
     @abstractmethod
-    def capture_camera_image(self, prim_path: str) -> Any:
+    def capture_camera_image(self, prim_path: str) -> np.ndarray:
         """Capture an RGB image from a camera. Returns image data."""
         ...
 
@@ -130,7 +136,7 @@ class IsaacAdapterBase(ABC):
         ...
 
     @abstractmethod
-    def get_lidar_point_cloud(self, prim_path: str) -> Any:
+    def get_lidar_point_cloud(self, prim_path: str) -> np.ndarray:
         """Get point cloud data from a lidar sensor."""
         ...
 
@@ -140,7 +146,7 @@ class IsaacAdapterBase(ABC):
     def create_pbr_material(
         self,
         prim_path: str,
-        color: Optional[List[float]] = None,
+        color: Optional[Sequence[float]] = None,
         roughness: float = 0.5,
         metallic: float = 0.0,
     ) -> Any:
@@ -171,14 +177,14 @@ class IsaacAdapterBase(ABC):
         light_type: str,
         prim_path: str,
         intensity: float = 1000.0,
-        color: Optional[List[float]] = None,
+        color: Optional[Sequence[float]] = None,
         **kwargs,
     ) -> Any:
         """Create a light prim (Distant, Dome, Sphere, Rect, Disk, Cylinder)."""
         ...
 
     @abstractmethod
-    def modify_light(self, prim_path: str, intensity: Optional[float] = None, color: Optional[List[float]] = None) -> None:
+    def modify_light(self, prim_path: str, intensity: Optional[float] = None, color: Optional[Sequence[float]] = None) -> None:
         """Modify properties of an existing light."""
         ...
 
