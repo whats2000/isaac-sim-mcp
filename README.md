@@ -2,7 +2,7 @@
 
 Natural language control for NVIDIA Isaac Sim through the Model Context Protocol (MCP).
 
-This project connects an MCP server to an Isaac Sim extension so tools like Cursor can inspect scenes, create robots and assets, control simulation, and execute targeted Python inside Isaac Sim from plain-English prompts.
+This project connects an MCP server to an Isaac Sim extension so any MCP-compatible IDE or client can inspect scenes, create robots and assets, control simulation, and execute targeted Python inside Isaac Sim from plain-English prompts.
 
 ![Robot Party Demo](media/add_more_robot_into_party.gif)
 
@@ -26,7 +26,7 @@ The current codebase is organized around Isaac Sim `5.1.0` and its `isaacsim.*` 
 ## Architecture
 
 ```text
-Cursor / MCP Client
+MCP Client (Cursor, VS Code, Claude Code, etc.)
         |
         v
 isaac_mcp/server.py
@@ -47,7 +47,7 @@ Handlers -> Adapter -> Isaac Sim 5.1.0 APIs
 - Python `3.10+`
 - `uv` / `uvx`
 - `mcp[cli]`
-- An MCP-compatible client such as Cursor
+- An MCP-compatible client (Cursor, VS Code, Claude Code, Windsurf, JetBrains IDEs, etc.)
 
 ## Quick Start
 
@@ -97,9 +97,13 @@ This script is the command your MCP client should launch:
 ./scripts/run_mcp_server.sh
 ```
 
-### 5. Add the MCP server to Cursor
+### 5. Add the MCP server to your IDE
 
-Open Cursor settings and add:
+Replace `/absolute/path/to/isaac-sim-mcp` with your actual repo path in the examples below.
+
+#### Cursor
+
+Open **Cursor Settings > MCP** and add a new global MCP server, or edit `~/.cursor/mcp.json`:
 
 ```json
 {
@@ -110,6 +114,90 @@ Open Cursor settings and add:
   }
 }
 ```
+
+#### VS Code (Claude Code Extension)
+
+Create or edit `.vscode/mcp.json` in your workspace root:
+
+```json
+{
+  "servers": {
+    "isaac-sim": {
+      "command": "/absolute/path/to/isaac-sim-mcp/scripts/run_mcp_server.sh"
+    }
+  }
+}
+```
+
+Alternatively, add it to your User or Workspace `settings.json`:
+
+```json
+{
+  "mcp": {
+    "servers": {
+      "isaac-sim": {
+        "command": "/absolute/path/to/isaac-sim-mcp/scripts/run_mcp_server.sh"
+      }
+    }
+  }
+}
+```
+
+#### Claude Code (CLI)
+
+Add the server using the CLI:
+
+```bash
+claude mcp add isaac-sim /absolute/path/to/isaac-sim-mcp/scripts/run_mcp_server.sh
+```
+
+Or manually edit `~/.claude.json` (global) or `.mcp.json` (project-level):
+
+```json
+{
+  "mcpServers": {
+    "isaac-sim": {
+      "command": "/absolute/path/to/isaac-sim-mcp/scripts/run_mcp_server.sh"
+    }
+  }
+}
+```
+
+#### Claude Desktop
+
+Edit the config file:
+
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+- Linux: `~/.config/Claude/claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "isaac-sim": {
+      "command": "/absolute/path/to/isaac-sim-mcp/scripts/run_mcp_server.sh"
+    }
+  }
+}
+```
+
+#### Windsurf
+
+Open **Windsurf Settings > MCP** or edit `~/.codeium/windsurf/mcp_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "isaac-sim": {
+      "command": "/absolute/path/to/isaac-sim-mcp/scripts/run_mcp_server.sh"
+    }
+  }
+}
+```
+
+#### JetBrains IDEs (IntelliJ, PyCharm, etc.)
+
+JetBrains IDEs with MCP support read from a `mcpServers` block in their settings. Go to **Settings > Tools > AI Assistant > MCP Servers**, or add the server configuration manually. Refer to the [JetBrains MCP documentation](https://www.jetbrains.com/help/idea/model-context-protocol.html) for your specific IDE version.
 
 ## Setup Notes
 
@@ -149,7 +237,7 @@ Verified on this repo:
 
 ## Recommended Workflow
 
-When prompting your MCP client:
+When prompting your MCP-enabled IDE or client:
 
 1. Start with `get_scene_info`
 2. Create a physics scene if the stage is empty
