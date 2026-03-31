@@ -61,8 +61,10 @@ cd isaac-sim-mcp
 
 ### 2. Install MCP prerequisites
 
+This project needs Python `3.10+`. If `python` or `python3` on your machine points to an older Conda environment, tell `uv` which interpreter to use explicitly.
+
 ```bash
-uv venv
+uv venv --python /usr/bin/python3.10
 source .venv/bin/activate
 uv pip install "mcp[cli]"
 ```
@@ -70,8 +72,17 @@ uv pip install "mcp[cli]"
 If you prefer not to activate the environment, you can also run:
 
 ```bash
-uv venv
+uv venv --python /usr/bin/python3.10
 uv pip install --python .venv/bin/python "mcp[cli]"
+```
+
+If you do not have Python `3.10+` installed system-wide, you can ask `uv` to download one:
+
+```bash
+uv python install 3.11
+uv venv --python 3.11
+source .venv/bin/activate
+uv pip install "mcp[cli]"
 ```
 
 ### 3. Launch Isaac Sim with the extension enabled
