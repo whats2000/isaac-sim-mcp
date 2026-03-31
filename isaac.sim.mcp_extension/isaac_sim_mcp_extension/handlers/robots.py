@@ -1,6 +1,11 @@
 """Robot creation and control command handlers."""
+from __future__ import annotations
+
+from typing import Any, Dict, List, Optional, Sequence
 
 import numpy as np
+
+from ..adapters.base import IsaacAdapterBase
 
 
 ROBOT_LIBRARY = {
@@ -12,7 +17,7 @@ ROBOT_LIBRARY = {
 }
 
 
-def register(registry, adapter):
+def register(registry: Dict[str, Any], adapter: IsaacAdapterBase) -> None:
     registry["robots.create"] = lambda **p: create(adapter, **p)
     registry["robots.list"] = lambda **p: list_robots(adapter, **p)
     registry["robots.get_info"] = lambda **p: get_info(adapter, **p)
@@ -20,7 +25,7 @@ def register(registry, adapter):
     registry["robots.get_joints"] = lambda **p: get_joints(adapter, **p)
 
 
-def create(adapter, robot_type="franka", position=None, name=None):
+def create(adapter: IsaacAdapterBase, robot_type: str = "franka", position: Optional[Sequence[float]] = None, name: Optional[str] = None) -> Dict[str, Any]:
     try:
         robot_type_lower = robot_type.lower()
         if robot_type_lower not in ROBOT_LIBRARY:
@@ -38,11 +43,11 @@ def create(adapter, robot_type="franka", position=None, name=None):
         return {"status": "error", "message": str(e)}
 
 
-def list_robots(adapter):
+def list_robots(adapter: IsaacAdapterBase) -> Dict[str, Any]:
     return {"status": "success", "robots": ROBOT_LIBRARY}
 
 
-def get_info(adapter, prim_path=None):
+def get_info(adapter: IsaacAdapterBase, prim_path: Optional[str] = None) -> Dict[str, Any]:
     try:
         if not prim_path:
             return {"status": "error", "message": "prim_path is required"}
@@ -52,7 +57,7 @@ def get_info(adapter, prim_path=None):
         return {"status": "error", "message": str(e)}
 
 
-def set_joints(adapter, prim_path=None, joint_positions=None, joint_indices=None):
+def set_joints(adapter: IsaacAdapterBase, prim_path: Optional[str] = None, joint_positions: Optional[Sequence[float]] = None, joint_indices: Optional[List[int]] = None) -> Dict[str, Any]:
     try:
         if not prim_path or joint_positions is None:
             return {"status": "error", "message": "prim_path and joint_positions are required"}
@@ -62,7 +67,7 @@ def set_joints(adapter, prim_path=None, joint_positions=None, joint_indices=None
         return {"status": "error", "message": str(e)}
 
 
-def get_joints(adapter, prim_path=None):
+def get_joints(adapter: IsaacAdapterBase, prim_path: Optional[str] = None) -> Dict[str, Any]:
     try:
         if not prim_path:
             return {"status": "error", "message": "prim_path is required"}

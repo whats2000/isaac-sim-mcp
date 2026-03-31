@@ -1,13 +1,18 @@
 """Material creation and binding command handlers."""
+from __future__ import annotations
+
+from typing import Any, Dict, Optional, Sequence
+
+from ..adapters.base import IsaacAdapterBase
 
 
-def register(registry, adapter):
+def register(registry: Dict[str, Any], adapter: IsaacAdapterBase) -> None:
     registry["materials.create"] = lambda **p: create(adapter, **p)
     registry["materials.apply"] = lambda **p: apply_material(adapter, **p)
 
 
-def create(adapter, material_type="pbr", prim_path=None, color=None, roughness=0.5, metallic=0.0,
-           static_friction=0.5, dynamic_friction=0.5, restitution=0.0):
+def create(adapter: IsaacAdapterBase, material_type: str = "pbr", prim_path: Optional[str] = None, color: Optional[Sequence[float]] = None, roughness: float = 0.5, metallic: float = 0.0,
+           static_friction: float = 0.5, dynamic_friction: float = 0.5, restitution: float = 0.0) -> Dict[str, Any]:
     try:
         if not prim_path:
             stage = adapter.get_stage()
@@ -25,7 +30,7 @@ def create(adapter, material_type="pbr", prim_path=None, color=None, roughness=0
         return {"status": "error", "message": str(e)}
 
 
-def apply_material(adapter, material_path=None, target_prim_path=None):
+def apply_material(adapter: IsaacAdapterBase, material_path: Optional[str] = None, target_prim_path: Optional[str] = None) -> Dict[str, Any]:
     try:
         if not material_path or not target_prim_path:
             return {"status": "error", "message": "material_path and target_prim_path are required"}

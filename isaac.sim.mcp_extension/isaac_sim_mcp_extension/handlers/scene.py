@@ -1,9 +1,13 @@
 """Scene management command handlers."""
+from __future__ import annotations
 
 import traceback
+from typing import Any, Dict, Optional, Sequence
+
+from ..adapters.base import IsaacAdapterBase
 
 
-def register(registry, adapter):
+def register(registry: Dict[str, Any], adapter: IsaacAdapterBase) -> None:
     registry["scene.get_info"] = lambda **p: get_info(adapter, **p)
     registry["scene.create_physics"] = lambda **p: create_physics(adapter, **p)
     registry["scene.clear"] = lambda **p: clear(adapter, **p)
@@ -11,7 +15,7 @@ def register(registry, adapter):
     registry["scene.get_prim_info"] = lambda **p: get_prim_info(adapter, **p)
 
 
-def get_info(adapter):
+def get_info(adapter: IsaacAdapterBase) -> Dict[str, Any]:
     try:
         stage = adapter.get_stage()
         assets_root = adapter.get_assets_root_path()
@@ -28,7 +32,7 @@ def get_info(adapter):
         return {"status": "error", "message": str(e)}
 
 
-def create_physics(adapter, gravity=None, scene_name="PhysicsScene"):
+def create_physics(adapter: IsaacAdapterBase, gravity: Optional[Sequence[float]] = None, scene_name: str = "PhysicsScene") -> Dict[str, Any]:
     try:
         scene_path = adapter.create_physics_scene(gravity=gravity, scene_name=scene_name)
         # Create ground plane
@@ -40,7 +44,7 @@ def create_physics(adapter, gravity=None, scene_name="PhysicsScene"):
         return {"status": "error", "message": str(e)}
 
 
-def clear(adapter, keep_physics=False):
+def clear(adapter: IsaacAdapterBase, keep_physics: bool = False) -> Dict[str, Any]:
     try:
         stage = adapter.get_stage()
         root = stage.GetPrimAtPath("/World")
@@ -56,7 +60,7 @@ def clear(adapter, keep_physics=False):
         return {"status": "error", "message": str(e)}
 
 
-def list_prims(adapter, root_path="/", prim_type=None):
+def list_prims(adapter: IsaacAdapterBase, root_path: str = "/", prim_type: Optional[str] = None) -> Dict[str, Any]:
     try:
         prims = adapter.list_prims(root_path=root_path, prim_type=prim_type)
         return {"status": "success", "prims": prims}
@@ -64,7 +68,7 @@ def list_prims(adapter, root_path="/", prim_type=None):
         return {"status": "error", "message": str(e)}
 
 
-def get_prim_info(adapter, prim_path="/"):
+def get_prim_info(adapter: IsaacAdapterBase, prim_path: str = "/") -> Dict[str, Any]:
     try:
         info = adapter.get_prim_info(prim_path)
         return {"status": "success", **info}

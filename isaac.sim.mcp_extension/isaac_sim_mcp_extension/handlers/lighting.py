@@ -1,12 +1,17 @@
 """Lighting command handlers."""
+from __future__ import annotations
+
+from typing import Any, Dict, Optional, Sequence
+
+from ..adapters.base import IsaacAdapterBase
 
 
-def register(registry, adapter):
+def register(registry: Dict[str, Any], adapter: IsaacAdapterBase) -> None:
     registry["lighting.create"] = lambda **p: create(adapter, **p)
     registry["lighting.modify"] = lambda **p: modify(adapter, **p)
 
 
-def create(adapter, light_type="DistantLight", position=None, intensity=1000.0, color=None, rotation=None, prim_path=None):
+def create(adapter: IsaacAdapterBase, light_type: str = "DistantLight", position: Optional[Sequence[float]] = None, intensity: float = 1000.0, color: Optional[Sequence[float]] = None, rotation: Optional[Sequence[float]] = None, prim_path: Optional[str] = None) -> Dict[str, Any]:
     try:
         if not prim_path:
             stage = adapter.get_stage()
@@ -18,7 +23,7 @@ def create(adapter, light_type="DistantLight", position=None, intensity=1000.0, 
         return {"status": "error", "message": str(e)}
 
 
-def modify(adapter, prim_path=None, intensity=None, color=None):
+def modify(adapter: IsaacAdapterBase, prim_path: Optional[str] = None, intensity: Optional[float] = None, color: Optional[Sequence[float]] = None) -> Dict[str, Any]:
     try:
         if not prim_path:
             return {"status": "error", "message": "prim_path is required"}

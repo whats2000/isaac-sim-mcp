@@ -1,7 +1,12 @@
 """Simulation control command handlers."""
+from __future__ import annotations
+
+from typing import Any, Dict, Optional, Sequence
+
+from ..adapters.base import IsaacAdapterBase
 
 
-def register(registry, adapter):
+def register(registry: Dict[str, Any], adapter: IsaacAdapterBase) -> None:
     registry["simulation.play"] = lambda **p: play(adapter, **p)
     registry["simulation.pause"] = lambda **p: pause(adapter, **p)
     registry["simulation.stop"] = lambda **p: stop(adapter, **p)
@@ -10,7 +15,7 @@ def register(registry, adapter):
     registry["simulation.execute_script"] = lambda **p: execute_script(adapter, **p)
 
 
-def play(adapter):
+def play(adapter: IsaacAdapterBase) -> Dict[str, Any]:
     try:
         adapter.play()
         return {"status": "success", "message": "Simulation started"}
@@ -18,7 +23,7 @@ def play(adapter):
         return {"status": "error", "message": str(e)}
 
 
-def pause(adapter):
+def pause(adapter: IsaacAdapterBase) -> Dict[str, Any]:
     try:
         adapter.pause()
         return {"status": "success", "message": "Simulation paused"}
@@ -26,7 +31,7 @@ def pause(adapter):
         return {"status": "error", "message": str(e)}
 
 
-def stop(adapter):
+def stop(adapter: IsaacAdapterBase) -> Dict[str, Any]:
     try:
         adapter.stop()
         return {"status": "success", "message": "Simulation stopped"}
@@ -34,7 +39,7 @@ def stop(adapter):
         return {"status": "error", "message": str(e)}
 
 
-def step(adapter, num_steps=1):
+def step(adapter: IsaacAdapterBase, num_steps: int = 1) -> Dict[str, Any]:
     try:
         adapter.step(num_steps=num_steps)
         return {"status": "success", "message": f"Stepped {num_steps} frames"}
@@ -42,7 +47,7 @@ def step(adapter, num_steps=1):
         return {"status": "error", "message": str(e)}
 
 
-def set_physics(adapter, gravity=None, time_step=None, gpu_enabled=None):
+def set_physics(adapter: IsaacAdapterBase, gravity: Optional[Sequence[float]] = None, time_step: Optional[float] = None, gpu_enabled: Optional[bool] = None) -> Dict[str, Any]:
     try:
         # Physics params are set via the PhysicsContext on the World
         # For now, gravity is the most common parameter
@@ -53,7 +58,7 @@ def set_physics(adapter, gravity=None, time_step=None, gpu_enabled=None):
         return {"status": "error", "message": str(e)}
 
 
-def execute_script(adapter, code=None):
+def execute_script(adapter: IsaacAdapterBase, code: Optional[str] = None) -> Dict[str, Any]:
     try:
         if not code:
             return {"status": "error", "message": "code is required"}

@@ -1,17 +1,21 @@
 """Sensor creation and data capture command handlers."""
+from __future__ import annotations
 
 import base64
 import os
+from typing import Any, Dict, Optional, Sequence
+
+from ..adapters.base import IsaacAdapterBase
 
 
-def register(registry, adapter):
+def register(registry: Dict[str, Any], adapter: IsaacAdapterBase) -> None:
     registry["sensors.create_camera"] = lambda **p: create_camera(adapter, **p)
     registry["sensors.capture_image"] = lambda **p: capture_image(adapter, **p)
     registry["sensors.create_lidar"] = lambda **p: create_lidar(adapter, **p)
     registry["sensors.get_point_cloud"] = lambda **p: get_point_cloud(adapter, **p)
 
 
-def create_camera(adapter, prim_path="/World/Camera", position=None, rotation=None, resolution=None):
+def create_camera(adapter: IsaacAdapterBase, prim_path: str = "/World/Camera", position: Optional[Sequence[float]] = None, rotation: Optional[Sequence[float]] = None, resolution: Optional[Sequence[int]] = None) -> Dict[str, Any]:
     try:
         res = tuple(resolution) if resolution else (1280, 720)
         cam = adapter.create_camera(prim_path, resolution=res)
@@ -22,7 +26,7 @@ def create_camera(adapter, prim_path="/World/Camera", position=None, rotation=No
         return {"status": "error", "message": str(e)}
 
 
-def capture_image(adapter, prim_path="/World/Camera", output_path=None):
+def capture_image(adapter: IsaacAdapterBase, prim_path: str = "/World/Camera", output_path: Optional[str] = None) -> Dict[str, Any]:
     try:
         image_data = adapter.capture_camera_image(prim_path)
         if output_path:
@@ -36,7 +40,7 @@ def capture_image(adapter, prim_path="/World/Camera", output_path=None):
         return {"status": "error", "message": str(e)}
 
 
-def create_lidar(adapter, prim_path="/World/Lidar", position=None, rotation=None, config=None):
+def create_lidar(adapter: IsaacAdapterBase, prim_path: str = "/World/Lidar", position: Optional[Sequence[float]] = None, rotation: Optional[Sequence[float]] = None, config: Optional[str] = None) -> Dict[str, Any]:
     try:
         adapter.create_lidar(prim_path, config=config)
         if position or rotation:
@@ -46,7 +50,7 @@ def create_lidar(adapter, prim_path="/World/Lidar", position=None, rotation=None
         return {"status": "error", "message": str(e)}
 
 
-def get_point_cloud(adapter, prim_path="/World/Lidar"):
+def get_point_cloud(adapter: IsaacAdapterBase, prim_path: str = "/World/Lidar") -> Dict[str, Any]:
     try:
         pc = adapter.get_lidar_point_cloud(prim_path)
         point_count = len(pc) if pc is not None else 0

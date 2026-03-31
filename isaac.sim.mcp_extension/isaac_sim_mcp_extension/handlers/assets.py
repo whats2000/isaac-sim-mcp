@@ -1,17 +1,21 @@
 """Asset import and loading command handlers."""
+from __future__ import annotations
 
+from typing import Any, Dict, Optional, Sequence
+
+from ..adapters.base import IsaacAdapterBase
 from isaac_sim_mcp_extension.gen3d import Beaver3d
 from isaac_sim_mcp_extension.usd import USDLoader, USDSearch3d
 
 
-def register(registry, adapter):
+def register(registry: Dict[str, Any], adapter: IsaacAdapterBase) -> None:
     registry["assets.import_urdf"] = lambda **p: import_urdf(adapter, **p)
     registry["assets.load_usd"] = lambda **p: load_usd(adapter, **p)
     registry["assets.search_usd"] = lambda **p: search_usd(adapter, **p)
     registry["assets.generate_3d"] = lambda **p: generate_3d(adapter, **p)
 
 
-def import_urdf(adapter, urdf_path=None, prim_path="/World/robot", position=None):
+def import_urdf(adapter: IsaacAdapterBase, urdf_path: Optional[str] = None, prim_path: str = "/World/robot", position: Optional[Sequence[float]] = None) -> Dict[str, Any]:
     try:
         if not urdf_path:
             return {"status": "error", "message": "urdf_path is required"}
@@ -23,7 +27,7 @@ def import_urdf(adapter, urdf_path=None, prim_path="/World/robot", position=None
         return {"status": "error", "message": str(e)}
 
 
-def load_usd(adapter, usd_url=None, prim_path="/World/my_usd", position=None, scale=None):
+def load_usd(adapter: IsaacAdapterBase, usd_url: Optional[str] = None, prim_path: str = "/World/my_usd", position: Optional[Sequence[float]] = None, scale: Optional[Sequence[float]] = None) -> Dict[str, Any]:
     try:
         if not usd_url:
             return {"status": "error", "message": "usd_url is required"}
@@ -34,7 +38,7 @@ def load_usd(adapter, usd_url=None, prim_path="/World/my_usd", position=None, sc
         return {"status": "error", "message": str(e)}
 
 
-def search_usd(adapter, text_prompt=None, target_path="/World/my_usd", position=None, scale=None):
+def search_usd(adapter: IsaacAdapterBase, text_prompt: Optional[str] = None, target_path: str = "/World/my_usd", position: Optional[Sequence[float]] = None, scale: Optional[Sequence[float]] = None) -> Dict[str, Any]:
     try:
         if not text_prompt:
             return {"status": "error", "message": "text_prompt is required"}
@@ -47,7 +51,7 @@ def search_usd(adapter, text_prompt=None, target_path="/World/my_usd", position=
         return {"status": "error", "message": str(e)}
 
 
-def generate_3d(adapter, text_prompt=None, image_url=None, position=None, scale=None):
+def generate_3d(adapter: IsaacAdapterBase, text_prompt: Optional[str] = None, image_url: Optional[str] = None, position: Optional[Sequence[float]] = None, scale: Optional[Sequence[float]] = None) -> Dict[str, Any]:
     try:
         if not text_prompt and not image_url:
             return {"status": "error", "message": "Either text_prompt or image_url is required"}
