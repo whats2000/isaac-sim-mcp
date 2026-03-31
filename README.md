@@ -199,6 +199,31 @@ Open **Windsurf Settings > MCP** or edit `~/.codeium/windsurf/mcp_config.json`:
 
 JetBrains IDEs with MCP support read from a `mcpServers` block in their settings. Go to **Settings > Tools > AI Assistant > MCP Servers**, or add the server configuration manually. Refer to the [JetBrains MCP documentation](https://www.jetbrains.com/help/idea/model-context-protocol.html) for your specific IDE version.
 
+## Desktop Launcher (Linux)
+
+You can install a separate **Isaac Sim MCP** application icon alongside the original Isaac Sim launcher.
+
+```bash
+./scripts/install_desktop_entry.sh
+```
+
+This gives you two application icons:
+- **Isaac Sim** — original, unchanged
+- **Isaac Sim MCP** — launches with the MCP extension and server
+
+The MCP launcher will:
+- Auto-assign a free port (starting from 8766) so multiple instances can run side by side
+- Wait for the extension socket to be ready before starting the MCP server
+- Automatically stop the MCP server when Isaac Sim exits
+
+MCP server logs are written to `logs/mcp_server_<port>.log`.
+
+To uninstall:
+
+```bash
+rm ~/.local/share/applications/IsaacSimMCP.desktop
+```
+
 ## Setup Notes
 
 These are the simple scripts used above:
@@ -207,6 +232,8 @@ These are the simple scripts used above:
 ./scripts/setup_python_env.sh
 ./scripts/run_isaac_sim.sh
 ./scripts/run_mcp_server.sh
+./scripts/launch_isaac_sim_mcp.sh    # combined launcher (Isaac Sim + MCP server)
+./scripts/install_desktop_entry.sh   # install desktop shortcut
 ```
 
 By default:

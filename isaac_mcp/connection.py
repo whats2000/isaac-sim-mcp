@@ -24,6 +24,7 @@
 
 from __future__ import annotations
 
+import os
 import socket
 import json
 import logging
@@ -32,13 +33,19 @@ from typing import Any, Dict, Optional
 
 logger = logging.getLogger("IsaacMCPServer")
 
+DEFAULT_PORT = 8766
+
 
 @dataclass
 class IsaacConnection:
     """Manages a persistent TCP socket connection to the Isaac Sim extension."""
 
     host: str = "localhost"
-    port: int = 8766
+    port: int = 0
+
+    def __post_init__(self):
+        if self.port == 0:
+            self.port = int(os.environ.get("ISAAC_MCP_PORT", DEFAULT_PORT))
     sock: Optional[socket.socket] = field(default=None, repr=False)
 
     def connect(self) -> bool:
@@ -133,7 +140,7 @@ def get_isaac_connection() -> IsaacConnection:
     global _isaac_connection
     if _isaac_connection is not None:
         return _isaac_connection
-    _isaac_connection = IsaacConnection(host="localhost", port=8766)
+    _isaac_connection = IsaacConnection(host="localhost")
     if not _isaac_connection.connect():
         _isaac_connection = None
         raise Exception("Could not connect to Isaac. Make sure the Isaac addon is running.")
