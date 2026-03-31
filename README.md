@@ -62,7 +62,16 @@ cd isaac-sim-mcp
 ### 2. Install MCP prerequisites
 
 ```bash
+uv venv
+source .venv/bin/activate
 uv pip install "mcp[cli]"
+```
+
+If you prefer not to activate the environment, you can also run:
+
+```bash
+uv venv
+uv pip install --python .venv/bin/python "mcp[cli]"
 ```
 
 ### 3. Launch Isaac Sim with the extension enabled
@@ -108,7 +117,7 @@ Isaac Sim MCP server started on localhost:8766
 ### 4. Run the MCP server
 
 ```bash
-uv run isaac_mcp/server.py
+python isaac_mcp/server.py
 ```
 
 ### 5. Add the MCP server to Cursor
@@ -119,7 +128,10 @@ Open Cursor settings and add:
 {
   "mcpServers": {
     "isaac-sim": {
-      "command": "uv run ~/Documents/isaac-sim-mcp/isaac_mcp/server.py"
+      "command": "/home/<your-user>/Documents/GitHub/isaac-sim-mcp/.venv/bin/python",
+      "args": [
+        "/home/<your-user>/Documents/GitHub/isaac-sim-mcp/isaac_mcp/server.py"
+      ]
     }
   }
 }
