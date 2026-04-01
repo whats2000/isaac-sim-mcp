@@ -97,6 +97,22 @@ def register_tools(mcp: FastMCP, get_connection: "Callable[[], IsaacConnection]"
         except Exception as e:
             return json.dumps({"status": "error", "message": str(e)})
 
+    @mcp.tool("get_isaac_logs")
+    def get_isaac_logs(clear: bool = True, count: int = 100) -> str:
+        """Get recent warning and error log messages from the Isaac Sim console.
+        Use this to diagnose simulation errors, physics warnings, and script failures.
+
+        Args:
+            clear: Clear the log buffer after reading. Default True.
+            count: Maximum number of log entries to return.
+        """
+        try:
+            conn = get_connection()
+            result = conn.send_command("simulation.get_logs", {"clear": clear, "count": count})
+            return json.dumps(result, indent=2)
+        except Exception as e:
+            return json.dumps({"status": "error", "message": str(e)})
+
     @mcp.tool("execute_script")
     def execute_script(code: str) -> str:
         """Execute arbitrary Python code in Isaac Sim. Use as an escape hatch for operations not covered by other tools.

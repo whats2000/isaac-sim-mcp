@@ -35,6 +35,7 @@ def register(registry: Dict[str, Any], adapter: IsaacAdapterBase) -> None:
     registry["simulation.step"] = lambda **p: step(adapter, **p)
     registry["simulation.set_physics"] = lambda **p: set_physics(adapter, **p)
     registry["simulation.execute_script"] = lambda **p: execute_script(adapter, **p)
+    registry["simulation.get_logs"] = lambda **p: get_logs(adapter, **p)
 
 
 def play(adapter: IsaacAdapterBase) -> Dict[str, Any]:
@@ -86,5 +87,52 @@ def execute_script(adapter: IsaacAdapterBase, code: Optional[str] = None) -> Dic
             return {"status": "error", "message": "code is required"}
         result = adapter.execute_script(code)
         return {"status": "success", "result": result}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
+# ── Log buffer for get_logs ───────────────────────────────────────────────────
+
+_log_buffer: list = []
+_log_listener_active: bool = False
+_MAX_LOG_BUFFER = 500
+
+
+def _ensure_log_listener():
+    """Register a carb log listener that captures errors and warnings."""
+    global _log_listener_active
+    if _log_listener_active:
+        return
+
+    import carb
+    import omni.log
+
+    logger = omni.log.get_log()
+
+    def _on_log(source, level, filename, function_name, line, message):
+        if level >= omni.log.Level.WARN:
+            level_name = "WARN" if level == omni.log.Level.WARN else "ERROR"
+            entry = f"[{level_name}] [{source}] {message}"
+            _log_buffer.append(entry)
+            if len(_log_buffer) > _MAX_LOG_BUFFER:
+                _log_buffer.pop(0)
+
+    logger.set_channel_enabled("*", omni.log.SettingBehavior.OVERRIDE, True)
+    logger.add_log_callback(_on_log)
+    _log_listener_active = True
+
+
+def get_logs(adapter: IsaacAdapterBase, clear: bool = True, count: int = 100) -> Dict[str, Any]:
+    """Return recent warning/error log messages from the Isaac Sim console."""
+    try:
+        _ensure_log_listener()
+        logs = _log_buffer[-count:]
+        if clear:
+            _log_buffer.clear()
+        return {
+            "status": "success",
+            "log_count": len(logs),
+            "logs": logs,
+        }
     except Exception as e:
         return {"status": "error", "message": str(e)}
