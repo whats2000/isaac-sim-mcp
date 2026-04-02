@@ -81,3 +81,6 @@ mcp_cache/
 
 # Don't ignore demo usd files
 !demo/*usd
+
+# Code agents configurations
+.claude
