@@ -22,13 +22,12 @@
 # SOFTWARE.
 
 """Scene management command handlers."""
+
 from __future__ import annotations
 
-import traceback
 from typing import Any, Dict, Optional, Sequence
 
 from ..adapters.base import IsaacAdapterBase
-
 
 _discovered_envs: Optional[Dict[str, Dict[str, str]]] = None
 
@@ -60,7 +59,9 @@ def get_info(adapter: IsaacAdapterBase) -> Dict[str, Any]:
         return {"status": "error", "message": str(e)}
 
 
-def create_physics(adapter: IsaacAdapterBase, gravity: Optional[Sequence[float]] = None, scene_name: str = "PhysicsScene") -> Dict[str, Any]:
+def create_physics(
+    adapter: IsaacAdapterBase, gravity: Optional[Sequence[float]] = None, scene_name: str = "PhysicsScene"
+) -> Dict[str, Any]:
     try:
         scene_path = adapter.create_physics_scene(gravity=gravity, scene_name=scene_name)
         # Create ground plane
@@ -75,8 +76,14 @@ def clear(adapter: IsaacAdapterBase, keep_physics: bool = False) -> Dict[str, An
     try:
         stage = adapter.get_stage()
         # Prims to never delete (system prims)
-        keep_paths = {"/OmniverseKit_Persp", "/OmniverseKit_Front", "/OmniverseKit_Top",
-                      "/OmniverseKit_Right", "/Render", "/Environment"}
+        keep_paths = {
+            "/OmniverseKit_Persp",
+            "/OmniverseKit_Front",
+            "/OmniverseKit_Top",
+            "/OmniverseKit_Right",
+            "/Render",
+            "/Environment",
+        }
         # Clear all root-level prims (robots created at root, etc.)
         root_prim = stage.GetPseudoRoot()
         for child in root_prim.GetChildren():
@@ -128,10 +135,15 @@ def list_environments(adapter: IsaacAdapterBase) -> Dict[str, Any]:
     return {"status": "success", "environment_count": len(library), "environments": library}
 
 
-def load_environment(adapter: IsaacAdapterBase, environment: Optional[str] = None, prim_path: str = "/Environment") -> Dict[str, Any]:
+def load_environment(
+    adapter: IsaacAdapterBase, environment: Optional[str] = None, prim_path: str = "/Environment"
+) -> Dict[str, Any]:
     try:
         if not environment:
-            return {"status": "error", "message": "environment is required. Use scene.list_environments to see options."}
+            return {
+                "status": "error",
+                "message": "environment is required. Use scene.list_environments to see options.",
+            }
 
         library = _get_env_library(adapter)
         q = environment.lower().strip()

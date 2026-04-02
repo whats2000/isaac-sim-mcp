@@ -22,6 +22,7 @@
 # SOFTWARE.
 
 """Robot creation and control command handlers."""
+
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional, Sequence
@@ -30,17 +31,36 @@ import numpy as np
 
 from ..adapters.base import IsaacAdapterBase
 
-
 # Hardcoded fallback — used only if live discovery fails.
 # Keys are lowercase robot names, asset_path is relative to the assets root.
 FALLBACK_ROBOT_LIBRARY: Dict[str, Dict[str, str]] = {
-    "frankapanda": {"asset_path": "/Isaac/Robots/FrankaRobotics/FrankaPanda/franka.usd", "description": "FrankaRobotics FrankaPanda", "manufacturer": "FrankaRobotics"},
-    "jetbot": {"asset_path": "/Isaac/Robots/NVIDIA/Jetbot/jetbot.usd", "description": "NVIDIA Jetbot", "manufacturer": "NVIDIA"},
-    "carter_v1": {"asset_path": "/Isaac/Robots/NVIDIA/Carter/carter_v1.usd", "description": "NVIDIA Carter", "manufacturer": "NVIDIA"},
-    "novacarter": {"asset_path": "/Isaac/Robots/NVIDIA/NovaCarter/nova_carter.usd", "description": "NVIDIA NovaCarter", "manufacturer": "NVIDIA"},
+    "frankapanda": {
+        "asset_path": "/Isaac/Robots/FrankaRobotics/FrankaPanda/franka.usd",
+        "description": "FrankaRobotics FrankaPanda",
+        "manufacturer": "FrankaRobotics",
+    },
+    "jetbot": {
+        "asset_path": "/Isaac/Robots/NVIDIA/Jetbot/jetbot.usd",
+        "description": "NVIDIA Jetbot",
+        "manufacturer": "NVIDIA",
+    },
+    "carter_v1": {
+        "asset_path": "/Isaac/Robots/NVIDIA/Carter/carter_v1.usd",
+        "description": "NVIDIA Carter",
+        "manufacturer": "NVIDIA",
+    },
+    "novacarter": {
+        "asset_path": "/Isaac/Robots/NVIDIA/NovaCarter/nova_carter.usd",
+        "description": "NVIDIA NovaCarter",
+        "manufacturer": "NVIDIA",
+    },
     "g1": {"asset_path": "/Isaac/Robots/Unitree/G1/g1.usd", "description": "Unitree G1", "manufacturer": "Unitree"},
     "go1": {"asset_path": "/Isaac/Robots/Unitree/Go1/go1.usd", "description": "Unitree Go1", "manufacturer": "Unitree"},
-    "spot": {"asset_path": "/Isaac/Robots/BostonDynamics/spot/spot.usd", "description": "BostonDynamics spot", "manufacturer": "BostonDynamics"},
+    "spot": {
+        "asset_path": "/Isaac/Robots/BostonDynamics/spot/spot.usd",
+        "description": "BostonDynamics spot",
+        "manufacturer": "BostonDynamics",
+    },
 }
 
 # Cached discovered robots — populated on first call to list_robots.
@@ -104,13 +124,21 @@ def register(registry: Dict[str, Any], adapter: IsaacAdapterBase) -> None:
     registry["robots.get_joints"] = lambda **p: get_joints(adapter, **p)
 
 
-def create(adapter: IsaacAdapterBase, robot_type: str = "franka", position: Optional[Sequence[float]] = None, name: Optional[str] = None) -> Dict[str, Any]:
+def create(
+    adapter: IsaacAdapterBase,
+    robot_type: str = "franka",
+    position: Optional[Sequence[float]] = None,
+    name: Optional[str] = None,
+) -> Dict[str, Any]:
     try:
         match = _find_robot(adapter, robot_type)
         if not match:
             library = _get_robot_library(adapter)
             available = list(library.keys())[:20]
-            return {"status": "error", "message": f"Robot '{robot_type}' not found. Try robots.list to see available robots. Some options: {available}"}
+            return {
+                "status": "error",
+                "message": f"Robot '{robot_type}' not found. Try robots.list to see available robots. Some options: {available}",
+            }
 
         assets_root = adapter.get_assets_root_path()
         asset_path = assets_root + match["asset_path"]
@@ -120,7 +148,12 @@ def create(adapter: IsaacAdapterBase, robot_type: str = "franka", position: Opti
         if position:
             xform = adapter.create_xform_prim(prim_path)
             xform.set_world_pose(position=np.array(position))
-        return {"status": "success", "message": f"Created {match['description']} robot", "prim_path": prim_path, "robot_key": match["key"]}
+        return {
+            "status": "success",
+            "message": f"Created {match['description']} robot",
+            "prim_path": prim_path,
+            "robot_key": match["key"],
+        }
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
@@ -135,7 +168,11 @@ def refresh_robots(adapter: IsaacAdapterBase) -> Dict[str, Any]:
     global _discovered_robots
     _discovered_robots = None
     library = _get_robot_library(adapter)
-    return {"status": "success", "message": f"Refreshed robot library, found {len(library)} robots", "robot_count": len(library)}
+    return {
+        "status": "success",
+        "message": f"Refreshed robot library, found {len(library)} robots",
+        "robot_count": len(library),
+    }
 
 
 def get_info(adapter: IsaacAdapterBase, prim_path: Optional[str] = None) -> Dict[str, Any]:
@@ -148,7 +185,12 @@ def get_info(adapter: IsaacAdapterBase, prim_path: Optional[str] = None) -> Dict
         return {"status": "error", "message": str(e)}
 
 
-def set_joints(adapter: IsaacAdapterBase, prim_path: Optional[str] = None, joint_positions: Optional[Sequence[float]] = None, joint_indices: Optional[List[int]] = None) -> Dict[str, Any]:
+def set_joints(
+    adapter: IsaacAdapterBase,
+    prim_path: Optional[str] = None,
+    joint_positions: Optional[Sequence[float]] = None,
+    joint_indices: Optional[List[int]] = None,
+) -> Dict[str, Any]:
     try:
         if not prim_path or joint_positions is None:
             return {"status": "error", "message": "prim_path and joint_positions are required"}

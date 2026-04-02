@@ -56,19 +56,20 @@ LICENSE_HEADER = """# MIT License
 
 LICENSE_DOCSTRING_HEADER_RE = re.compile(
     r'^(?P<prefix>#![^\n]*\n\n?)?"""'
-    r'\nMIT License\n'
-    r'.*?'
-    r'\nSOFTWARE\.\n'
+    r"\nMIT License\n"
+    r".*?"
+    r"\nSOFTWARE\.\n"
     r'"""\n\n?',
     re.DOTALL,
 )
 
 # Directories to skip
-SKIP_DIRS = ['.git', '.vscode', '__pycache__', 'venv', 'env', '.env', 'build', 'dist']
+SKIP_DIRS = [".git", ".vscode", "__pycache__", "venv", "env", ".env", "build", "dist"]
+
 
 # Check if the file already has a license header
 def has_license(content):
-    return 'MIT License' in content[:500] and 'Copyright' in content[:500]
+    return "MIT License" in content[:500] and "Copyright" in content[:500]
 
 
 def normalize_existing_header(content):
@@ -77,19 +78,19 @@ def normalize_existing_header(content):
         return content
 
     prefix = match.group("prefix") or ""
-    rest = content[match.end():]
+    rest = content[match.end() :]
     if prefix:
         return prefix + LICENSE_HEADER + rest
     return LICENSE_HEADER + rest
 
 
 def process_file(file_path):
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
 
     normalized_content = normalize_existing_header(content)
     if normalized_content != content:
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             f.write(normalized_content)
         print(f"Normalized license header in {file_path}")
         return True
@@ -100,41 +101,43 @@ def process_file(file_path):
         return False
 
     # Handle shebang line if present
-    if content.startswith('#!'):
-        shebang_end = content.find('\n') + 1
-        new_content = content[:shebang_end] + '\n' + LICENSE_HEADER + content[shebang_end:]
+    if content.startswith("#!"):
+        shebang_end = content.find("\n") + 1
+        new_content = content[:shebang_end] + "\n" + LICENSE_HEADER + content[shebang_end:]
     else:
         new_content = LICENSE_HEADER + content
-    
-    with open(file_path, 'w', encoding='utf-8') as f:
+
+    with open(file_path, "w", encoding="utf-8") as f:
         f.write(new_content)
-    
+
     print(f"Added license header to {file_path}")
     return True
 
+
 def process_directory(directory):
     files_processed = 0
-    
+
     for root, dirs, files in os.walk(directory):
         # Skip directories in SKIP_DIRS
         dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
-        
+
         for file in files:
-            if file.endswith('.py') and file != 'add_license_headers.py':
+            if file.endswith(".py") and file != "add_license_headers.py":
                 file_path = os.path.join(root, file)
                 if process_file(file_path):
                     files_processed += 1
-    
+
     return files_processed
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     # Get the directory to process, default to current directory
-    directory = sys.argv[1] if len(sys.argv) > 1 else '.'
-    
+    directory = sys.argv[1] if len(sys.argv) > 1 else "."
+
     if not os.path.isdir(directory):
         print(f"Error: {directory} is not a valid directory")
         sys.exit(1)
-    
+
     print(f"Adding license headers to Python files in {directory}")
     count = process_directory(directory)
-    print(f"Added license headers to {count} files") 
+    print(f"Added license headers to {count} files")

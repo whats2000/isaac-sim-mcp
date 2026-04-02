@@ -26,8 +26,9 @@
 from __future__ import annotations
 
 import traceback
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Tuple
+
 import numpy as np
-from typing import Any, Dict, List, Optional, Sequence, Tuple, TYPE_CHECKING
 
 from .base import IsaacAdapterBase
 
@@ -42,20 +43,24 @@ class IsaacAdapterV5(IsaacAdapterBase):
 
     def get_stage(self) -> Usd.Stage:
         import omni.usd
+
         return omni.usd.get_context().get_stage()
 
     def get_assets_root_path(self) -> str:
         from isaacsim.storage.native import get_assets_root_path
+
         return get_assets_root_path()
 
     # ── Prims ──────────────────────────────────────────────
 
     def create_prim(self, prim_path: str, prim_type: str = "Xform", **kwargs) -> Usd.Prim:
         from isaacsim.core.utils.prims import create_prim
+
         return create_prim(prim_path, prim_type, **kwargs)
 
     def delete_prim(self, prim_path: str) -> bool:
         import omni.kit.commands
+
         omni.kit.commands.execute("DeletePrims", paths=[prim_path])
         return True
 
@@ -107,10 +112,12 @@ class IsaacAdapterV5(IsaacAdapterBase):
 
     def load_environment(self, env_path: str, prim_path: str = "/Environment") -> None:
         from isaacsim.core.utils.stage import add_reference_to_stage
+
         add_reference_to_stage(env_path, prim_path)
 
     def add_reference_to_stage(self, usd_path: str, prim_path: str) -> Usd.Prim:
         from isaacsim.core.utils.stage import add_reference_to_stage
+
         return add_reference_to_stage(usd_path, prim_path)
 
     def set_prim_transform(
@@ -120,7 +127,8 @@ class IsaacAdapterV5(IsaacAdapterBase):
         rotation: Optional[Sequence[float]] = None,
         scale: Optional[Sequence[float]] = None,
     ) -> None:
-        from pxr import UsdGeom, Gf
+        from pxr import Gf, UsdGeom
+
         stage = self.get_stage()
         prim = stage.GetPrimAtPath(prim_path)
         if not prim.IsValid():
@@ -135,7 +143,8 @@ class IsaacAdapterV5(IsaacAdapterBase):
             xformable.AddScaleOp(precision=UsdGeom.XformOp.PrecisionDouble).Set(Gf.Vec3d(*scale))
 
     def get_prim_transform(self, prim_path: str) -> Dict[str, Any]:
-        from pxr import UsdGeom, Gf
+        from pxr import UsdGeom
+
         stage = self.get_stage()
         prim = stage.GetPrimAtPath(prim_path)
         if not prim.IsValid():
@@ -209,7 +218,7 @@ class IsaacAdapterV5(IsaacAdapterBase):
                     if not (fname.endswith(".usd") or fname.endswith(".usda")):
                         continue
                     # Skip variants with suffixes like _physx_lidar, _with_arm
-                    base_name = fname.rsplit(".", 1)[0]
+                    _base_name = fname.rsplit(".", 1)[0]
                     asset_rel = f"/Isaac/Robots/{mfr_name}/{model_name}/{fname}"
 
                     # Use lowercase model name as key, prefer shorter/simpler names
@@ -229,14 +238,17 @@ class IsaacAdapterV5(IsaacAdapterBase):
 
     def create_xform_prim(self, prim_path: str) -> Any:
         from isaacsim.core.prims import SingleXFormPrim
+
         return SingleXFormPrim(prim_path=prim_path)
 
     def create_articulation(self, prim_path: str, name: str) -> Any:
         from isaacsim.core.prims import SingleArticulation
+
         return SingleArticulation(prim_path=prim_path, name=name)
 
     def get_robot_joint_info(self, prim_path: str) -> Dict[str, Any]:
         from isaacsim.core.prims import SingleArticulation
+
         art = SingleArticulation(prim_path=prim_path)
         return {
             "joint_names": art.dof_names if art.dof_names else [],
@@ -251,6 +263,7 @@ class IsaacAdapterV5(IsaacAdapterBase):
     ) -> None:
         from isaacsim.core.prims import SingleArticulation
         from isaacsim.core.utils.types import ArticulationAction
+
         art = SingleArticulation(prim_path=prim_path)
         art.initialize()
         action = ArticulationAction(
@@ -262,13 +275,14 @@ class IsaacAdapterV5(IsaacAdapterBase):
 
     def get_joint_positions(self, prim_path: str) -> List[float]:
         from isaacsim.core.prims import SingleArticulation
+
         art = SingleArticulation(prim_path=prim_path)
         positions = art.get_joint_positions()
         return positions.tolist() if positions is not None else []
 
     def get_joint_config(self, prim_path: str) -> Dict[str, Any]:
-        from pxr import UsdPhysics, Usd
         from isaacsim.core.prims import SingleArticulation
+        from pxr import Usd, UsdPhysics
 
         stage = self.get_stage()
         prim = stage.GetPrimAtPath(prim_path)
@@ -353,20 +367,24 @@ class IsaacAdapterV5(IsaacAdapterBase):
 
     def create_world(self, **kwargs) -> Any:
         from isaacsim.core.api import World
+
         return World(**kwargs)
 
     def create_simulation_context(self, **kwargs) -> Any:
         from isaacsim.core.api import SimulationContext
+
         return SimulationContext(**kwargs)
 
     def create_physics_scene(self, gravity: Optional[Sequence[float]] = None, scene_name: str = "PhysicsScene") -> str:
         import omni.kit.commands
+
         scene_path = f"/World/{scene_name}"
         omni.kit.commands.execute("CreatePrim", prim_path=scene_path, prim_type="PhysicsScene")
         return scene_path
 
     def get_physics_state(self, prim_path: str) -> Dict[str, Any]:
-        from pxr import UsdPhysics, Gf
+        from pxr import UsdPhysics
+
         stage = self.get_stage()
         prim = stage.GetPrimAtPath(prim_path)
         if not prim.IsValid():
@@ -410,7 +428,6 @@ class IsaacAdapterV5(IsaacAdapterBase):
 
         # Get contact info if available
         try:
-            from omni.physx import get_physx_scene_query_interface
             contacts = []
             result["contacts"] = contacts
         except Exception:
@@ -422,19 +439,23 @@ class IsaacAdapterV5(IsaacAdapterBase):
 
     def create_camera(self, prim_path: str, resolution: Tuple[int, int] = (1280, 720), **kwargs) -> Any:
         from isaacsim.sensors.camera import Camera
+
         return Camera(prim_path=prim_path, resolution=resolution, **kwargs)
 
     def capture_camera_image(self, prim_path: str) -> np.ndarray:
         from isaacsim.sensors.camera import Camera
+
         cam = Camera(prim_path=prim_path)
         return cam.get_rgba()
 
     def create_lidar(self, prim_path: str, config: Optional[str] = None, **kwargs) -> Any:
         from isaacsim.sensors.rtx import LidarRtx
+
         return LidarRtx(prim_path=prim_path, config=config or "Example_Rotary", **kwargs)
 
     def get_lidar_point_cloud(self, prim_path: str) -> np.ndarray:
         from isaacsim.sensors.rtx import LidarRtx
+
         lidar = LidarRtx(prim_path=prim_path)
         return lidar.get_point_cloud()
 
@@ -447,7 +468,8 @@ class IsaacAdapterV5(IsaacAdapterBase):
         roughness: float = 0.5,
         metallic: float = 0.0,
     ) -> Any:
-        from pxr import UsdShade, Sdf, Gf
+        from pxr import Gf, Sdf, UsdShade
+
         stage = self.get_stage()
         material = UsdShade.Material.Define(stage, prim_path)
         shader = UsdShade.Shader.Define(stage, f"{prim_path}/Shader")
@@ -467,6 +489,7 @@ class IsaacAdapterV5(IsaacAdapterBase):
         restitution: float = 0.0,
     ) -> Any:
         from pxr import UsdPhysics
+
         stage = self.get_stage()
         material = UsdPhysics.MaterialAPI.Apply(stage.DefinePrim(prim_path))
         material.CreateStaticFrictionAttr(static_friction)
@@ -476,6 +499,7 @@ class IsaacAdapterV5(IsaacAdapterBase):
 
     def apply_material(self, material_path: str, target_prim_path: str) -> None:
         from pxr import UsdShade
+
         stage = self.get_stage()
         material = UsdShade.Material(stage.GetPrimAtPath(material_path))
         target = stage.GetPrimAtPath(target_prim_path)
@@ -491,7 +515,8 @@ class IsaacAdapterV5(IsaacAdapterBase):
         color: Optional[Sequence[float]] = None,
         **kwargs,
     ) -> Any:
-        from pxr import UsdLux, Gf
+        from pxr import Gf, UsdLux
+
         stage = self.get_stage()
         light_classes = {
             "DistantLight": UsdLux.DistantLight,
@@ -522,7 +547,8 @@ class IsaacAdapterV5(IsaacAdapterBase):
         intensity: Optional[float] = None,
         color: Optional[Sequence[float]] = None,
     ) -> None:
-        from pxr import UsdLux, Gf
+        from pxr import Gf
+
         stage = self.get_stage()
         prim = stage.GetPrimAtPath(prim_path)
         if not prim.IsValid():
@@ -536,13 +562,16 @@ class IsaacAdapterV5(IsaacAdapterBase):
 
     def clone_prim(self, source_path: str, target_path: str) -> None:
         import omni.kit.commands
+
         omni.kit.commands.execute("CopyPrim", path_from=source_path, path_to=target_path)
 
     def import_urdf(self, urdf_path: str, prim_path: str = "/World/robot", **kwargs) -> Any:
         import os
+
         if not os.path.isfile(urdf_path):
             raise FileNotFoundError(f"URDF file not found: {urdf_path}")
         import omni.kit.commands
+
         status, import_config = omni.kit.commands.execute("URDFCreateImportConfig")
         omni.kit.commands.execute("URDFParseFile", urdf_path=urdf_path, import_config=import_config)
         result = omni.kit.commands.execute(
@@ -557,18 +586,22 @@ class IsaacAdapterV5(IsaacAdapterBase):
 
     def play(self) -> None:
         import omni.timeline
+
         omni.timeline.get_timeline_interface().play()
 
     def pause(self) -> None:
         import omni.timeline
+
         omni.timeline.get_timeline_interface().pause()
 
     def stop(self) -> None:
         import omni.timeline
+
         omni.timeline.get_timeline_interface().stop()
 
-    def step(self, num_steps: int = 1, observe_prims: Optional[List[str]] = None,
-             observe_joints: Optional[List[str]] = None) -> Dict[str, Any]:
+    def step(
+        self, num_steps: int = 1, observe_prims: Optional[List[str]] = None, observe_joints: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
         import omni.kit.app
 
         for _ in range(num_steps):
@@ -579,6 +612,7 @@ class IsaacAdapterV5(IsaacAdapterBase):
         # Observe prim states
         if observe_prims:
             from pxr import UsdPhysics
+
             prim_states = []
             stage = self.get_stage()
             for path in observe_prims:
@@ -607,6 +641,7 @@ class IsaacAdapterV5(IsaacAdapterBase):
                 try:
                     positions = self.get_joint_positions(path)
                     from isaacsim.core.prims import SingleArticulation
+
                     art = SingleArticulation(prim_path=path)
                     names = art.dof_names if art.dof_names else []
                     joints_dict = dict(zip(names, positions)) if names else {"positions": positions}
@@ -634,6 +669,7 @@ class IsaacAdapterV5(IsaacAdapterBase):
         current_time = timeline.get_current_time()
         # Get physics dt from physics scene if available
         from pxr import UsdPhysics
+
         stage = self.get_stage()
         physics_dt = 1.0 / 60.0  # default
         for prim in stage.Traverse():
@@ -652,11 +688,12 @@ class IsaacAdapterV5(IsaacAdapterBase):
         }
 
     def execute_script(self, code: str, cwd: Optional[str] = None) -> Dict[str, Any]:
-        import sys
         import io
-        import omni
+        import sys
+
         import carb
-        from pxr import Usd, UsdGeom, Sdf, Gf
+        import omni
+        from pxr import Gf, Sdf, Usd, UsdGeom
 
         # Auto-add cwd to sys.path
         if cwd and cwd not in sys.path:
@@ -688,10 +725,10 @@ class IsaacAdapterV5(IsaacAdapterBase):
             sys.stdout, sys.stderr = old_stdout, old_stderr
 
     def reload_script(self, file_path: str, module_name: Optional[str] = None) -> Dict[str, Any]:
-        import sys
-        import os
-        import io
         import importlib
+        import io
+        import os
+        import sys
 
         # Auto-add parent directory to sys.path
         parent_dir = os.path.dirname(os.path.abspath(file_path))
@@ -706,10 +743,10 @@ class IsaacAdapterV5(IsaacAdapterBase):
             if module_name:
                 # Reload existing module or import for first time
                 if module_name in sys.modules:
-                    module = importlib.reload(sys.modules[module_name])
+                    _module = importlib.reload(sys.modules[module_name])
                     msg = f"Module '{module_name}' reloaded successfully"
                 else:
-                    module = importlib.import_module(module_name)
+                    _module = importlib.import_module(module_name)
                     msg = f"Module '{module_name}' imported successfully"
             else:
                 # Execute file contents (hot-patch)
@@ -717,11 +754,19 @@ class IsaacAdapterV5(IsaacAdapterBase):
                     return {"status": "error", "message": f"File not found: {file_path}"}
                 with open(file_path, "r") as f:
                     code = f.read()
-                import omni
                 import carb
-                from pxr import Usd, UsdGeom, Sdf, Gf
-                local_ns = {"omni": omni, "carb": carb, "Usd": Usd, "UsdGeom": UsdGeom,
-                             "Sdf": Sdf, "Gf": Gf, "__file__": file_path}
+                import omni
+                from pxr import Gf, Sdf, Usd, UsdGeom
+
+                local_ns = {
+                    "omni": omni,
+                    "carb": carb,
+                    "Usd": Usd,
+                    "UsdGeom": UsdGeom,
+                    "Sdf": Sdf,
+                    "Gf": Gf,
+                    "__file__": file_path,
+                }
                 exec(code, local_ns)
                 msg = f"Script '{os.path.basename(file_path)}' executed successfully"
 

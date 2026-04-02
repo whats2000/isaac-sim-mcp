@@ -22,6 +22,7 @@
 # SOFTWARE.
 
 """Object creation and manipulation command handlers."""
+
 from __future__ import annotations
 
 from typing import Any, Dict, Optional, Sequence
@@ -36,13 +37,22 @@ def register(registry: Dict[str, Any], adapter: IsaacAdapterBase) -> None:
     registry["objects.clone"] = lambda **p: clone(adapter, **p)
 
 
-def create(adapter: IsaacAdapterBase, object_type: str = "Cube", position: Optional[Sequence[float]] = None, rotation: Optional[Sequence[float]] = None, scale: Optional[Sequence[float]] = None, color: Optional[Sequence[float]] = None, physics_enabled: bool = False, prim_path: Optional[str] = None) -> Dict[str, Any]:
+def create(
+    adapter: IsaacAdapterBase,
+    object_type: str = "Cube",
+    position: Optional[Sequence[float]] = None,
+    rotation: Optional[Sequence[float]] = None,
+    scale: Optional[Sequence[float]] = None,
+    color: Optional[Sequence[float]] = None,
+    physics_enabled: bool = False,
+    prim_path: Optional[str] = None,
+) -> Dict[str, Any]:
     try:
         if not prim_path:
             stage = adapter.get_stage()
             count = len(list(stage.TraverseAll()))
             prim_path = f"/World/{object_type}_{count}"
-        prim = adapter.create_prim(prim_path, prim_type=object_type)
+        _prim = adapter.create_prim(prim_path, prim_type=object_type)
         if position or rotation or scale:
             adapter.set_prim_transform(prim_path, position=position, rotation=rotation, scale=scale)
         return {"status": "success", "message": f"Created {object_type}", "prim_path": prim_path}
@@ -60,7 +70,13 @@ def delete(adapter: IsaacAdapterBase, prim_path: Optional[str] = None) -> Dict[s
         return {"status": "error", "message": str(e)}
 
 
-def transform(adapter: IsaacAdapterBase, prim_path: Optional[str] = None, position: Optional[Sequence[float]] = None, rotation: Optional[Sequence[float]] = None, scale: Optional[Sequence[float]] = None) -> Dict[str, Any]:
+def transform(
+    adapter: IsaacAdapterBase,
+    prim_path: Optional[str] = None,
+    position: Optional[Sequence[float]] = None,
+    rotation: Optional[Sequence[float]] = None,
+    scale: Optional[Sequence[float]] = None,
+) -> Dict[str, Any]:
     try:
         if not prim_path:
             return {"status": "error", "message": "prim_path is required"}
@@ -70,7 +86,12 @@ def transform(adapter: IsaacAdapterBase, prim_path: Optional[str] = None, positi
         return {"status": "error", "message": str(e)}
 
 
-def clone(adapter: IsaacAdapterBase, source_path: Optional[str] = None, target_path: Optional[str] = None, position: Optional[Sequence[float]] = None) -> Dict[str, Any]:
+def clone(
+    adapter: IsaacAdapterBase,
+    source_path: Optional[str] = None,
+    target_path: Optional[str] = None,
+    position: Optional[Sequence[float]] = None,
+) -> Dict[str, Any]:
     try:
         if not source_path or not target_path:
             return {"status": "error", "message": "source_path and target_path are required"}

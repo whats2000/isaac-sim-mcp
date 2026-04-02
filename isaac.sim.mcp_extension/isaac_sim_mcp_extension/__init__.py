@@ -22,4 +22,5 @@
 # SOFTWARE.
 
 from .extension import MCPExtension
+
 __all__ = ["MCPExtension"]

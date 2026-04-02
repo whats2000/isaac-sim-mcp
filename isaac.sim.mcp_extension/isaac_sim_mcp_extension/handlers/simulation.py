@@ -22,6 +22,7 @@
 # SOFTWARE.
 
 """Simulation control command handlers."""
+
 from __future__ import annotations
 
 from typing import Any, Dict, Optional, Sequence
@@ -67,18 +68,25 @@ def stop(adapter: IsaacAdapterBase) -> Dict[str, Any]:
         return {"status": "error", "message": str(e)}
 
 
-def step(adapter: IsaacAdapterBase, num_steps: int = 1,
-         observe_prims: Optional[Sequence[str]] = None,
-         observe_joints: Optional[Sequence[str]] = None) -> Dict[str, Any]:
+def step(
+    adapter: IsaacAdapterBase,
+    num_steps: int = 1,
+    observe_prims: Optional[Sequence[str]] = None,
+    observe_joints: Optional[Sequence[str]] = None,
+) -> Dict[str, Any]:
     try:
-        result = adapter.step(num_steps=num_steps, observe_prims=observe_prims,
-                              observe_joints=observe_joints)
+        result = adapter.step(num_steps=num_steps, observe_prims=observe_prims, observe_joints=observe_joints)
         return {"status": "success", "message": f"Stepped {num_steps} frames", **result}
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
 
-def set_physics(adapter: IsaacAdapterBase, gravity: Optional[Sequence[float]] = None, time_step: Optional[float] = None, gpu_enabled: Optional[bool] = None) -> Dict[str, Any]:
+def set_physics(
+    adapter: IsaacAdapterBase,
+    gravity: Optional[Sequence[float]] = None,
+    time_step: Optional[float] = None,
+    gpu_enabled: Optional[bool] = None,
+) -> Dict[str, Any]:
     try:
         # Physics params are set via the PhysicsContext on the World
         # For now, gravity is the most common parameter
@@ -127,7 +135,9 @@ def get_joint_config_handler(adapter: IsaacAdapterBase, prim_path: Optional[str]
         return {"status": "error", "message": str(e)}
 
 
-def reload_script_handler(adapter: IsaacAdapterBase, file_path: Optional[str] = None, module_name: Optional[str] = None) -> Dict[str, Any]:
+def reload_script_handler(
+    adapter: IsaacAdapterBase, file_path: Optional[str] = None, module_name: Optional[str] = None
+) -> Dict[str, Any]:
     try:
         if not file_path:
             return {"status": "error", "message": "file_path is required"}
@@ -150,7 +160,6 @@ def _ensure_log_listener():
     if _log_listener_active:
         return
 
-    import carb
     import omni.log
 
     logger = omni.log.get_log()

@@ -31,4 +31,5 @@ def get_adapter():
     Future versions will detect the runtime version and return the matching adapter.
     """
     from .v5 import IsaacAdapterV5
+
     return IsaacAdapterV5()

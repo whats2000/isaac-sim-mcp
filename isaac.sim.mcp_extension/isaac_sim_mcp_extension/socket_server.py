@@ -30,7 +30,7 @@ import socket
 import threading
 import time
 import traceback
-from typing import Callable, Dict, Any
+from typing import Any, Callable, Dict
 
 
 class SocketServer:
@@ -140,11 +140,10 @@ class SocketServer:
             except Exception as e:
                 traceback.print_exc()
                 try:
-                    client.sendall(
-                        json.dumps({"status": "error", "message": str(e)}).encode("utf-8")
-                    )
+                    client.sendall(json.dumps({"status": "error", "message": str(e)}).encode("utf-8"))
                 except Exception:
                     pass
 
         from omni.kit.async_engine import run_coroutine
+
         run_coroutine(execute_wrapper())

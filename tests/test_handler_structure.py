@@ -26,9 +26,7 @@
 import ast
 import os
 
-EXTENSION_ROOT = os.path.join(
-    os.path.dirname(__file__), "..", "isaac.sim.mcp_extension", "isaac_sim_mcp_extension"
-)
+EXTENSION_ROOT = os.path.join(os.path.dirname(__file__), "..", "isaac.sim.mcp_extension", "isaac_sim_mcp_extension")
 
 
 def _parse_file(path):
@@ -48,19 +46,47 @@ def test_adapter_base_has_all_abstract_methods():
                 elif isinstance(decorator, ast.Attribute) and decorator.attr == "abstractmethod":
                     methods.add(node.name)
     expected = {
-        "get_stage", "get_assets_root_path", "discover_environments", "load_environment",
-        "create_prim", "delete_prim", "add_reference_to_stage",
-        "set_prim_transform", "get_prim_transform", "list_prims", "get_prim_info",
-        "create_xform_prim", "create_articulation",
-        "discover_robots", "get_robot_joint_info", "set_joint_positions", "get_joint_positions",
-        "create_world", "create_simulation_context", "create_physics_scene",
-        "create_camera", "capture_camera_image", "create_lidar", "get_lidar_point_cloud",
-        "create_pbr_material", "create_physics_material", "apply_material",
-        "create_light", "modify_light",
-        "clone_prim", "import_urdf",
-        "play", "pause", "stop", "step", "execute_script",
+        "get_stage",
+        "get_assets_root_path",
+        "discover_environments",
+        "load_environment",
+        "create_prim",
+        "delete_prim",
+        "add_reference_to_stage",
+        "set_prim_transform",
+        "get_prim_transform",
+        "list_prims",
+        "get_prim_info",
+        "create_xform_prim",
+        "create_articulation",
+        "discover_robots",
+        "get_robot_joint_info",
+        "set_joint_positions",
+        "get_joint_positions",
+        "create_world",
+        "create_simulation_context",
+        "create_physics_scene",
+        "create_camera",
+        "capture_camera_image",
+        "create_lidar",
+        "get_lidar_point_cloud",
+        "create_pbr_material",
+        "create_physics_material",
+        "apply_material",
+        "create_light",
+        "modify_light",
+        "clone_prim",
+        "import_urdf",
+        "play",
+        "pause",
+        "stop",
+        "step",
+        "execute_script",
         # Observability methods (issue #1)
-        "get_simulation_state", "get_physics_state", "get_joint_config", "reload_script",
+        "get_simulation_state",
+        "get_physics_state",
+        "get_joint_config",
+        "reload_script",
     }
     assert methods == expected, f"Missing: {expected - methods}, Extra: {methods - expected}"
 
@@ -74,8 +100,9 @@ def test_v5_adapter_implements_all_methods():
     for node in ast.walk(base_tree):
         if isinstance(node, ast.FunctionDef) and node.name != "__init__":
             for decorator in node.decorator_list:
-                if (isinstance(decorator, ast.Name) and decorator.id == "abstractmethod") or \
-                   (isinstance(decorator, ast.Attribute) and decorator.attr == "abstractmethod"):
+                if (isinstance(decorator, ast.Name) and decorator.id == "abstractmethod") or (
+                    isinstance(decorator, ast.Attribute) and decorator.attr == "abstractmethod"
+                ):
                     base_methods.add(node.name)
 
     v5_methods = set()
@@ -91,8 +118,14 @@ def test_all_handler_modules_have_register():
     """Verify every handler module exposes a register(registry, adapter) function."""
     handlers_dir = os.path.join(EXTENSION_ROOT, "handlers")
     handler_files = [
-        "scene.py", "objects.py", "lighting.py", "robots.py",
-        "sensors.py", "materials.py", "assets.py", "simulation.py",
+        "scene.py",
+        "objects.py",
+        "lighting.py",
+        "robots.py",
+        "sensors.py",
+        "materials.py",
+        "assets.py",
+        "simulation.py",
     ]
     for filename in handler_files:
         filepath = os.path.join(handlers_dir, filename)

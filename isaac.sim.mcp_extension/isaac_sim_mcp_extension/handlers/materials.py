@@ -22,6 +22,7 @@
 # SOFTWARE.
 
 """Material creation and binding command handlers."""
+
 from __future__ import annotations
 
 from typing import Any, Dict, Optional, Sequence
@@ -34,8 +35,17 @@ def register(registry: Dict[str, Any], adapter: IsaacAdapterBase) -> None:
     registry["materials.apply"] = lambda **p: apply_material(adapter, **p)
 
 
-def create(adapter: IsaacAdapterBase, material_type: str = "pbr", prim_path: Optional[str] = None, color: Optional[Sequence[float]] = None, roughness: float = 0.5, metallic: float = 0.0,
-           static_friction: float = 0.5, dynamic_friction: float = 0.5, restitution: float = 0.0) -> Dict[str, Any]:
+def create(
+    adapter: IsaacAdapterBase,
+    material_type: str = "pbr",
+    prim_path: Optional[str] = None,
+    color: Optional[Sequence[float]] = None,
+    roughness: float = 0.5,
+    metallic: float = 0.0,
+    static_friction: float = 0.5,
+    dynamic_friction: float = 0.5,
+    restitution: float = 0.0,
+) -> Dict[str, Any]:
     try:
         if not prim_path:
             stage = adapter.get_stage()
@@ -44,8 +54,9 @@ def create(adapter: IsaacAdapterBase, material_type: str = "pbr", prim_path: Opt
         if material_type == "pbr":
             adapter.create_pbr_material(prim_path, color=color, roughness=roughness, metallic=metallic)
         elif material_type == "physics":
-            adapter.create_physics_material(prim_path, static_friction=static_friction,
-                                            dynamic_friction=dynamic_friction, restitution=restitution)
+            adapter.create_physics_material(
+                prim_path, static_friction=static_friction, dynamic_friction=dynamic_friction, restitution=restitution
+            )
         else:
             return {"status": "error", "message": f"Unknown material type: {material_type}. Options: pbr, physics"}
         return {"status": "success", "message": f"Created {material_type} material", "prim_path": prim_path}
@@ -53,7 +64,9 @@ def create(adapter: IsaacAdapterBase, material_type: str = "pbr", prim_path: Opt
         return {"status": "error", "message": str(e)}
 
 
-def apply_material(adapter: IsaacAdapterBase, material_path: Optional[str] = None, target_prim_path: Optional[str] = None) -> Dict[str, Any]:
+def apply_material(
+    adapter: IsaacAdapterBase, material_path: Optional[str] = None, target_prim_path: Optional[str] = None
+) -> Dict[str, Any]:
     try:
         if not material_path or not target_prim_path:
             return {"status": "error", "message": "material_path and target_prim_path are required"}

@@ -41,17 +41,17 @@ All tests are skipped automatically if Isaac Sim is not reachable.
 from __future__ import annotations
 
 import json
+import os
 import socket
 import sys
-import os
+from typing import Any, Dict, Optional
+
 import pytest
-from typing import Any, Dict, Optional, Sequence
 
 # Add project root to path so we can import isaac_mcp
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from isaac_mcp.connection import IsaacConnection
-
 
 # ── Fixtures ──────────────────────────────────────────────
 
@@ -98,7 +98,6 @@ def send(conn: IsaacConnection, cmd_type: str, params: Optional[Dict[str, Any]] 
 
 @requires_isaac
 class TestSceneTools:
-
     def test_get_scene_info(self, conn: IsaacConnection) -> None:
         resp = send(conn, "scene.get_info")
         assert resp["status"] == "success", f"Failed: {resp}"
@@ -135,56 +134,79 @@ class TestSceneTools:
 
 @requires_isaac
 class TestObjectTools:
-
     def test_create_cube(self, conn: IsaacConnection) -> None:
-        resp = send(conn, "objects.create", {
-            "object_type": "Cube",
-            "prim_path": "/World/TestCube",
-            "position": [1.0, 0.0, 0.0],
-        })
+        resp = send(
+            conn,
+            "objects.create",
+            {
+                "object_type": "Cube",
+                "prim_path": "/World/TestCube",
+                "position": [1.0, 0.0, 0.0],
+            },
+        )
         assert resp["status"] == "success", f"Failed: {resp}"
         result = resp["result"]
         assert result["prim_path"] == "/World/TestCube"
 
     def test_create_sphere(self, conn: IsaacConnection) -> None:
-        resp = send(conn, "objects.create", {
-            "object_type": "Sphere",
-            "prim_path": "/World/TestSphere",
-            "position": [2.0, 0.0, 0.0],
-        })
+        resp = send(
+            conn,
+            "objects.create",
+            {
+                "object_type": "Sphere",
+                "prim_path": "/World/TestSphere",
+                "position": [2.0, 0.0, 0.0],
+            },
+        )
         assert resp["status"] == "success", f"Failed: {resp}"
 
     def test_create_cylinder(self, conn: IsaacConnection) -> None:
-        resp = send(conn, "objects.create", {
-            "object_type": "Cylinder",
-            "prim_path": "/World/TestCylinder",
-        })
+        resp = send(
+            conn,
+            "objects.create",
+            {
+                "object_type": "Cylinder",
+                "prim_path": "/World/TestCylinder",
+            },
+        )
         assert resp["status"] == "success", f"Failed: {resp}"
 
     def test_create_cone(self, conn: IsaacConnection) -> None:
-        resp = send(conn, "objects.create", {
-            "object_type": "Cone",
-            "prim_path": "/World/TestCone",
-        })
+        resp = send(
+            conn,
+            "objects.create",
+            {
+                "object_type": "Cone",
+                "prim_path": "/World/TestCone",
+            },
+        )
         assert resp["status"] == "success", f"Failed: {resp}"
 
     def test_transform_object(self, conn: IsaacConnection) -> None:
         # Create then transform
         send(conn, "objects.create", {"object_type": "Cube", "prim_path": "/World/TransformCube"})
-        resp = send(conn, "objects.transform", {
-            "prim_path": "/World/TransformCube",
-            "position": [5.0, 5.0, 0.0],
-            "scale": [2.0, 2.0, 2.0],
-        })
+        resp = send(
+            conn,
+            "objects.transform",
+            {
+                "prim_path": "/World/TransformCube",
+                "position": [5.0, 5.0, 0.0],
+                "scale": [2.0, 2.0, 2.0],
+            },
+        )
         assert resp["status"] == "success", f"Failed: {resp}"
 
     def test_clone_object(self, conn: IsaacConnection) -> None:
         send(conn, "objects.create", {"object_type": "Cube", "prim_path": "/World/OrigCube"})
-        resp = send(conn, "objects.clone", {
-            "source_path": "/World/OrigCube",
-            "target_path": "/World/ClonedCube",
-            "position": [3.0, 0.0, 0.0],
-        })
+        resp = send(
+            conn,
+            "objects.clone",
+            {
+                "source_path": "/World/OrigCube",
+                "target_path": "/World/ClonedCube",
+                "position": [3.0, 0.0, 0.0],
+            },
+        )
         assert resp["status"] == "success", f"Failed: {resp}"
 
     def test_delete_object(self, conn: IsaacConnection) -> None:
@@ -198,59 +220,86 @@ class TestObjectTools:
 
 @requires_isaac
 class TestLightingTools:
-
     def test_create_distant_light(self, conn: IsaacConnection) -> None:
-        resp = send(conn, "lighting.create", {
-            "light_type": "DistantLight",
-            "prim_path": "/World/TestDistantLight",
-            "intensity": 500.0,
-        })
+        resp = send(
+            conn,
+            "lighting.create",
+            {
+                "light_type": "DistantLight",
+                "prim_path": "/World/TestDistantLight",
+                "intensity": 500.0,
+            },
+        )
         assert resp["status"] == "success", f"Failed: {resp}"
 
     def test_create_sphere_light(self, conn: IsaacConnection) -> None:
-        resp = send(conn, "lighting.create", {
-            "light_type": "SphereLight",
-            "prim_path": "/World/TestSphereLight",
-            "intensity": 1000.0,
-            "color": [1.0, 0.8, 0.6],
-            "position": [0.0, 0.0, 5.0],
-        })
+        resp = send(
+            conn,
+            "lighting.create",
+            {
+                "light_type": "SphereLight",
+                "prim_path": "/World/TestSphereLight",
+                "intensity": 1000.0,
+                "color": [1.0, 0.8, 0.6],
+                "position": [0.0, 0.0, 5.0],
+            },
+        )
         assert resp["status"] == "success", f"Failed: {resp}"
 
     def test_create_dome_light(self, conn: IsaacConnection) -> None:
-        resp = send(conn, "lighting.create", {
-            "light_type": "DomeLight",
-            "prim_path": "/World/TestDomeLight",
-            "intensity": 300.0,
-        })
+        resp = send(
+            conn,
+            "lighting.create",
+            {
+                "light_type": "DomeLight",
+                "prim_path": "/World/TestDomeLight",
+                "intensity": 300.0,
+            },
+        )
         assert resp["status"] == "success", f"Failed: {resp}"
 
     def test_create_rect_light(self, conn: IsaacConnection) -> None:
-        resp = send(conn, "lighting.create", {
-            "light_type": "RectLight",
-            "prim_path": "/World/TestRectLight",
-            "intensity": 800.0,
-        })
+        resp = send(
+            conn,
+            "lighting.create",
+            {
+                "light_type": "RectLight",
+                "prim_path": "/World/TestRectLight",
+                "intensity": 800.0,
+            },
+        )
         assert resp["status"] == "success", f"Failed: {resp}"
 
     def test_modify_light(self, conn: IsaacConnection) -> None:
-        send(conn, "lighting.create", {
-            "light_type": "DistantLight",
-            "prim_path": "/World/ModifyLight",
-            "intensity": 500.0,
-        })
-        resp = send(conn, "lighting.modify", {
-            "prim_path": "/World/ModifyLight",
-            "intensity": 1500.0,
-            "color": [0.0, 1.0, 0.0],
-        })
+        send(
+            conn,
+            "lighting.create",
+            {
+                "light_type": "DistantLight",
+                "prim_path": "/World/ModifyLight",
+                "intensity": 500.0,
+            },
+        )
+        resp = send(
+            conn,
+            "lighting.modify",
+            {
+                "prim_path": "/World/ModifyLight",
+                "intensity": 1500.0,
+                "color": [0.0, 1.0, 0.0],
+            },
+        )
         assert resp["status"] == "success", f"Failed: {resp}"
 
     def test_invalid_light_type(self, conn: IsaacConnection) -> None:
-        resp = send(conn, "lighting.create", {
-            "light_type": "InvalidLight",
-            "prim_path": "/World/BadLight",
-        })
+        resp = send(
+            conn,
+            "lighting.create",
+            {
+                "light_type": "InvalidLight",
+                "prim_path": "/World/BadLight",
+            },
+        )
         assert resp["status"] == "error"
 
 
@@ -259,7 +308,6 @@ class TestLightingTools:
 
 @requires_isaac
 class TestRobotTools:
-
     def test_list_available_robots(self, conn: IsaacConnection) -> None:
         resp = send(conn, "robots.list")
         assert resp["status"] == "success", f"Failed: {resp}"
@@ -272,24 +320,36 @@ class TestRobotTools:
         assert "carter" in robots
 
     def test_create_franka(self, conn: IsaacConnection) -> None:
-        resp = send(conn, "robots.create", {
-            "robot_type": "franka",
-            "position": [0.0, 0.0, 0.0],
-        })
+        resp = send(
+            conn,
+            "robots.create",
+            {
+                "robot_type": "franka",
+                "position": [0.0, 0.0, 0.0],
+            },
+        )
         assert resp["status"] == "success", f"Failed: {resp}"
 
     def test_create_g1(self, conn: IsaacConnection) -> None:
-        resp = send(conn, "robots.create", {
-            "robot_type": "g1",
-            "position": [2.0, 0.0, 0.0],
-        })
+        resp = send(
+            conn,
+            "robots.create",
+            {
+                "robot_type": "g1",
+                "position": [2.0, 0.0, 0.0],
+            },
+        )
         assert resp["status"] == "success", f"Failed: {resp}"
 
     def test_create_go1(self, conn: IsaacConnection) -> None:
-        resp = send(conn, "robots.create", {
-            "robot_type": "go1",
-            "position": [4.0, 0.0, 0.0],
-        })
+        resp = send(
+            conn,
+            "robots.create",
+            {
+                "robot_type": "go1",
+                "position": [4.0, 0.0, 0.0],
+            },
+        )
         assert resp["status"] == "success", f"Failed: {resp}"
 
     def test_create_invalid_robot(self, conn: IsaacConnection) -> None:
@@ -297,11 +357,15 @@ class TestRobotTools:
         assert resp["status"] == "error"
 
     def test_get_robot_info(self, conn: IsaacConnection) -> None:
-        send(conn, "robots.create", {
-            "robot_type": "franka",
-            "position": [6.0, 0.0, 0.0],
-            "name": "InfoFranka",
-        })
+        send(
+            conn,
+            "robots.create",
+            {
+                "robot_type": "franka",
+                "position": [6.0, 0.0, 0.0],
+                "name": "InfoFranka",
+            },
+        )
         resp = send(conn, "robots.get_info", {"prim_path": "/InfoFranka"})
         # May need physics initialized to get full info
         assert resp["status"] in ("success", "error")
@@ -312,42 +376,61 @@ class TestRobotTools:
 
 @requires_isaac
 class TestMaterialTools:
-
     def test_create_pbr_material(self, conn: IsaacConnection) -> None:
-        resp = send(conn, "materials.create", {
-            "material_type": "pbr",
-            "prim_path": "/World/TestPBR",
-            "color": [0.8, 0.2, 0.2],
-            "roughness": 0.3,
-            "metallic": 0.9,
-        })
+        resp = send(
+            conn,
+            "materials.create",
+            {
+                "material_type": "pbr",
+                "prim_path": "/World/TestPBR",
+                "color": [0.8, 0.2, 0.2],
+                "roughness": 0.3,
+                "metallic": 0.9,
+            },
+        )
         assert resp["status"] == "success", f"Failed: {resp}"
 
     def test_create_physics_material(self, conn: IsaacConnection) -> None:
-        resp = send(conn, "materials.create", {
-            "material_type": "physics",
-            "prim_path": "/World/TestPhysMat",
-        })
+        resp = send(
+            conn,
+            "materials.create",
+            {
+                "material_type": "physics",
+                "prim_path": "/World/TestPhysMat",
+            },
+        )
         assert resp["status"] == "success", f"Failed: {resp}"
 
     def test_apply_material(self, conn: IsaacConnection) -> None:
         send(conn, "objects.create", {"object_type": "Cube", "prim_path": "/World/MatCube"})
-        send(conn, "materials.create", {
-            "material_type": "pbr",
-            "prim_path": "/World/ApplyMat",
-            "color": [0.0, 1.0, 0.0],
-        })
-        resp = send(conn, "materials.apply", {
-            "material_path": "/World/ApplyMat",
-            "target_prim_path": "/World/MatCube",
-        })
+        send(
+            conn,
+            "materials.create",
+            {
+                "material_type": "pbr",
+                "prim_path": "/World/ApplyMat",
+                "color": [0.0, 1.0, 0.0],
+            },
+        )
+        resp = send(
+            conn,
+            "materials.apply",
+            {
+                "material_path": "/World/ApplyMat",
+                "target_prim_path": "/World/MatCube",
+            },
+        )
         assert resp["status"] == "success", f"Failed: {resp}"
 
     def test_invalid_material_type(self, conn: IsaacConnection) -> None:
-        resp = send(conn, "materials.create", {
-            "material_type": "invalid",
-            "prim_path": "/World/BadMat",
-        })
+        resp = send(
+            conn,
+            "materials.create",
+            {
+                "material_type": "invalid",
+                "prim_path": "/World/BadMat",
+            },
+        )
         assert resp["status"] == "error"
 
 
@@ -356,31 +439,46 @@ class TestMaterialTools:
 
 @requires_isaac
 class TestSensorTools:
-
     def test_create_camera(self, conn: IsaacConnection) -> None:
-        resp = send(conn, "sensors.create_camera", {
-            "prim_path": "/World/TestCamera",
-            "position": [5.0, 5.0, 3.0],
-            "resolution": [640, 480],
-        })
+        resp = send(
+            conn,
+            "sensors.create_camera",
+            {
+                "prim_path": "/World/TestCamera",
+                "position": [5.0, 5.0, 3.0],
+                "resolution": [640, 480],
+            },
+        )
         assert resp["status"] == "success", f"Failed: {resp}"
 
     def test_capture_image(self, conn: IsaacConnection) -> None:
-        send(conn, "sensors.create_camera", {
-            "prim_path": "/World/CapCamera",
-            "position": [0.0, -5.0, 2.0],
-        })
-        resp = send(conn, "sensors.capture_image", {
-            "prim_path": "/World/CapCamera",
-        })
+        send(
+            conn,
+            "sensors.create_camera",
+            {
+                "prim_path": "/World/CapCamera",
+                "position": [0.0, -5.0, 2.0],
+            },
+        )
+        resp = send(
+            conn,
+            "sensors.capture_image",
+            {
+                "prim_path": "/World/CapCamera",
+            },
+        )
         # Capture may require simulation to be running; accept both success and error
         assert resp["status"] in ("success", "error")
 
     def test_create_lidar(self, conn: IsaacConnection) -> None:
-        resp = send(conn, "sensors.create_lidar", {
-            "prim_path": "/World/TestLidar",
-            "position": [0.0, 0.0, 2.0],
-        })
+        resp = send(
+            conn,
+            "sensors.create_lidar",
+            {
+                "prim_path": "/World/TestLidar",
+                "position": [0.0, 0.0, 2.0],
+            },
+        )
         # Lidar creation may vary by Isaac Sim config
         assert resp["status"] in ("success", "error")
 
@@ -390,11 +488,14 @@ class TestSensorTools:
 
 @requires_isaac
 class TestAssetTools:
-
     def test_import_urdf_missing_file(self, conn: IsaacConnection) -> None:
-        resp = send(conn, "assets.import_urdf", {
-            "urdf_path": "/nonexistent/robot.urdf",
-        })
+        resp = send(
+            conn,
+            "assets.import_urdf",
+            {
+                "urdf_path": "/nonexistent/robot.urdf",
+            },
+        )
         assert resp["status"] == "error"
 
     def test_load_usd_missing_url(self, conn: IsaacConnection) -> None:
@@ -415,7 +516,6 @@ class TestAssetTools:
 
 @requires_isaac
 class TestSimulationTools:
-
     def test_play(self, conn: IsaacConnection) -> None:
         resp = send(conn, "simulation.play")
         assert resp["status"] == "success", f"Failed: {resp}"
@@ -433,15 +533,23 @@ class TestSimulationTools:
         assert resp["status"] == "success", f"Failed: {resp}"
 
     def test_execute_script(self, conn: IsaacConnection) -> None:
-        resp = send(conn, "simulation.execute_script", {
-            "code": "result = 1 + 1",
-        })
+        resp = send(
+            conn,
+            "simulation.execute_script",
+            {
+                "code": "result = 1 + 1",
+            },
+        )
         assert resp["status"] == "success", f"Failed: {resp}"
 
     def test_execute_script_error(self, conn: IsaacConnection) -> None:
-        resp = send(conn, "simulation.execute_script", {
-            "code": "raise ValueError('test error')",
-        })
+        resp = send(
+            conn,
+            "simulation.execute_script",
+            {
+                "code": "raise ValueError('test error')",
+            },
+        )
         # Script errors should be caught and returned
         assert resp["status"] in ("success", "error")
 
@@ -455,7 +563,6 @@ class TestSimulationTools:
 
 @requires_isaac
 class TestErrorHandling:
-
     def test_unknown_command(self, conn: IsaacConnection) -> None:
         resp = send(conn, "nonexistent.command")
         assert resp["status"] == "error"

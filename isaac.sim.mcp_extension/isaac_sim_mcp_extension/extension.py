@@ -42,7 +42,6 @@ from .socket_server import SocketServer
 
 
 class MCPExtension(omni.ext.IExt):
-
     def __init__(self):
         super().__init__()
         self.ext_id = None

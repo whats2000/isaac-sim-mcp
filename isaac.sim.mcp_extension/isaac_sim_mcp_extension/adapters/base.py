@@ -25,9 +25,10 @@
 
 from __future__ import annotations
 
-import numpy as np
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Tuple
+
+import numpy as np
 
 if TYPE_CHECKING:
     from pxr import Usd
@@ -235,7 +236,9 @@ class IsaacAdapterBase(ABC):
         ...
 
     @abstractmethod
-    def modify_light(self, prim_path: str, intensity: Optional[float] = None, color: Optional[Sequence[float]] = None) -> None:
+    def modify_light(
+        self, prim_path: str, intensity: Optional[float] = None, color: Optional[Sequence[float]] = None
+    ) -> None:
         """Modify properties of an existing light."""
         ...
 
@@ -269,8 +272,9 @@ class IsaacAdapterBase(ABC):
         ...
 
     @abstractmethod
-    def step(self, num_steps: int = 1, observe_prims: Optional[List[str]] = None,
-             observe_joints: Optional[List[str]] = None) -> Dict[str, Any]:
+    def step(
+        self, num_steps: int = 1, observe_prims: Optional[List[str]] = None, observe_joints: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
         """Step the simulation forward and optionally observe prim/joint states.
 
         Args:

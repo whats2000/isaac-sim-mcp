@@ -22,13 +22,15 @@
 # SOFTWARE.
 
 """Asset import and loading command handlers."""
+
 from __future__ import annotations
 
 from typing import Any, Dict, Optional, Sequence
 
-from ..adapters.base import IsaacAdapterBase
 from isaac_sim_mcp_extension.gen3d import Beaver3d
 from isaac_sim_mcp_extension.usd import USDLoader, USDSearch3d
+
+from ..adapters.base import IsaacAdapterBase
 
 
 def register(registry: Dict[str, Any], adapter: IsaacAdapterBase) -> None:
@@ -38,11 +40,16 @@ def register(registry: Dict[str, Any], adapter: IsaacAdapterBase) -> None:
     registry["assets.generate_3d"] = lambda **p: generate_3d(adapter, **p)
 
 
-def import_urdf(adapter: IsaacAdapterBase, urdf_path: Optional[str] = None, prim_path: str = "/World/robot", position: Optional[Sequence[float]] = None) -> Dict[str, Any]:
+def import_urdf(
+    adapter: IsaacAdapterBase,
+    urdf_path: Optional[str] = None,
+    prim_path: str = "/World/robot",
+    position: Optional[Sequence[float]] = None,
+) -> Dict[str, Any]:
     try:
         if not urdf_path:
             return {"status": "error", "message": "urdf_path is required"}
-        result = adapter.import_urdf(urdf_path, prim_path=prim_path)
+        _result = adapter.import_urdf(urdf_path, prim_path=prim_path)
         if position:
             adapter.set_prim_transform(prim_path, position=position)
         return {"status": "success", "message": f"Imported URDF from {urdf_path}", "prim_path": prim_path}
@@ -50,7 +57,13 @@ def import_urdf(adapter: IsaacAdapterBase, urdf_path: Optional[str] = None, prim
         return {"status": "error", "message": str(e)}
 
 
-def load_usd(adapter: IsaacAdapterBase, usd_url: Optional[str] = None, prim_path: str = "/World/my_usd", position: Optional[Sequence[float]] = None, scale: Optional[Sequence[float]] = None) -> Dict[str, Any]:
+def load_usd(
+    adapter: IsaacAdapterBase,
+    usd_url: Optional[str] = None,
+    prim_path: str = "/World/my_usd",
+    position: Optional[Sequence[float]] = None,
+    scale: Optional[Sequence[float]] = None,
+) -> Dict[str, Any]:
     try:
         if not usd_url:
             return {"status": "error", "message": "usd_url is required"}
@@ -61,7 +74,13 @@ def load_usd(adapter: IsaacAdapterBase, usd_url: Optional[str] = None, prim_path
         return {"status": "error", "message": str(e)}
 
 
-def search_usd(adapter: IsaacAdapterBase, text_prompt: Optional[str] = None, target_path: str = "/World/my_usd", position: Optional[Sequence[float]] = None, scale: Optional[Sequence[float]] = None) -> Dict[str, Any]:
+def search_usd(
+    adapter: IsaacAdapterBase,
+    text_prompt: Optional[str] = None,
+    target_path: str = "/World/my_usd",
+    position: Optional[Sequence[float]] = None,
+    scale: Optional[Sequence[float]] = None,
+) -> Dict[str, Any]:
     try:
         if not text_prompt:
             return {"status": "error", "message": "text_prompt is required"}
@@ -69,12 +88,23 @@ def search_usd(adapter: IsaacAdapterBase, text_prompt: Optional[str] = None, tar
         url = searcher.search(text_prompt)
         loader = USDLoader()
         prim_path = loader.load_usd_from_url(url_path=url, target_path=target_path)
-        return {"status": "success", "message": f"Found and loaded USD for '{text_prompt}'", "prim_path": prim_path, "url": url}
+        return {
+            "status": "success",
+            "message": f"Found and loaded USD for '{text_prompt}'",
+            "prim_path": prim_path,
+            "url": url,
+        }
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
 
-def generate_3d(adapter: IsaacAdapterBase, text_prompt: Optional[str] = None, image_url: Optional[str] = None, position: Optional[Sequence[float]] = None, scale: Optional[Sequence[float]] = None) -> Dict[str, Any]:
+def generate_3d(
+    adapter: IsaacAdapterBase,
+    text_prompt: Optional[str] = None,
+    image_url: Optional[str] = None,
+    position: Optional[Sequence[float]] = None,
+    scale: Optional[Sequence[float]] = None,
+) -> Dict[str, Any]:
     try:
         if not text_prompt and not image_url:
             return {"status": "error", "message": "Either text_prompt or image_url is required"}
@@ -96,7 +126,8 @@ def generate_3d(adapter: IsaacAdapterBase, text_prompt: Optional[str] = None, im
                 loader.transform(position=position or (0, 0, 50), scale=scale or (10, 10, 10))
 
         from omni.kit.async_engine import run_coroutine
+
         run_coroutine(beaver.monitor_task_status_async(task_id, on_complete_callback=on_complete))
-        return {"status": "success", "message": f"3D generation started", "task_id": task_id}
+        return {"status": "success", "message": "3D generation started", "task_id": task_id}
     except Exception as e:
         return {"status": "error", "message": str(e)}

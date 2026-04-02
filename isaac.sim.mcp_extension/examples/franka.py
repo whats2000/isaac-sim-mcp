@@ -22,33 +22,29 @@
 # SOFTWARE.
 
 import asyncio
-from time import sleep
-from isaacsim.core.api import SimulationContext
-from isaacsim.core.utils.prims import create_prim
-from isaacsim.core.utils.stage import add_reference_to_stage, is_stage_loading
-from isaacsim.storage.native import get_assets_root_path
-from isaacsim.core.prims import SingleXFormPrim as XFormPrim
-from isaacsim.core.prims import SingleArticulation as Articulation
+
 import numpy as np
-from isaacsim.core.api import World
-
-
+from isaacsim.core.api import SimulationContext, World
+from isaacsim.core.prims import SingleArticulation as Articulation
+from isaacsim.core.prims import SingleXFormPrim as XFormPrim
+from isaacsim.core.utils.stage import add_reference_to_stage
+from isaacsim.storage.native import get_assets_root_path
 
 assets_root_path = get_assets_root_path()
 asset_path = assets_root_path + "/Isaac/Robots/Franka/franka_alt_fingers.usd"
 franka_robot = add_reference_to_stage(asset_path, "/World/Franka")
-#cre_prim("/DistantLight", "DistantLight")
+# cre_prim("/DistantLight", "DistantLight")
 
 # set the position of the robot
 # robot_prim = XFormPrim(prim_path="/World/Franka")
-# robot_prim.set_world_pose(position=np.array([2.0, 1.5, 0.0])) 
+# robot_prim.set_world_pose(position=np.array([2.0, 1.5, 0.0]))
 for row in range(5):
     for col in range(5):
         object_path = f"/World/Franka_{row}_{col}"
         add_reference_to_stage(asset_path, object_path)
         robot_prim = XFormPrim(prim_path=object_path)
-        robot_prim.set_world_pose(position=np.array([2.0 + row * 1 - 4, 1.5 + col * 1 - 4, 0.0])) 
-    
+        robot_prim.set_world_pose(position=np.array([2.0 + row * 1 - 4, 1.5 + col * 1 - 4, 0.0]))
+
 
 physics_initialized = False
 simulation_context = None
@@ -85,14 +81,13 @@ simulation_context = None
 #             physics_initialized = True
 #             print("Physics initialization complete.")
 
+
 #         except Exception as e:
 #             print(f"Error during physics initialization: {e}")
 #             raise  # Re-raise the exception to halt the simulation setup
 # Create and run the simulation
 async def main():
-    
-    
-    
+
     await asyncio.sleep(3)
     # need to initialize physics getting any articulation..etc
     # simulation_context = SimulationContext()
@@ -100,7 +95,7 @@ async def main():
     # await initialize_physics(physics_initialized, simulation_context)
     # Create world
     my_world = World(physics_dt=1.0 / 60.0, rendering_dt=1.0 / 60.0, stage_units_in_meters=1.0)
-        
+
     # Get the stage
     # stage = my_world.get_stage()
     simulation_context = SimulationContext(physics_dt=1.0 / 60.0, rendering_dt=1.0 / 60.0, stage_units_in_meters=1.0)
@@ -113,17 +108,16 @@ async def main():
     for _ in range(1000):
         my_world.step_async()
 
-
-    
     # Now initialize the robot
     franka_robot_art = Articulation(prim_path="/World/Franka", name="Franka")
     franka_robot_art.initialize(simulation_context.physics_sim_view)
     # Now get the controller after initialization
-    franka_controller = franka_robot_art.get_articulation_controller()
-    
-        # art = Articulation(prim_path="/World/G1")
+    _franka_controller = franka_robot_art.get_articulation_controller()
+
+    # art = Articulation(prim_path="/World/G1")
 
     # simulation_context.stop()
+
 
 # Launch the async function
 # sleep(1)

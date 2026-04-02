@@ -4,9 +4,8 @@ RMPflow-based controller. setup() runs once, compute() every frame.
 On timeline STOP the state resets so next Play reruns the sequence.
 """
 
-import numpy as np
 import carb
-
+import numpy as np
 import omni.physx
 import omni.timeline
 import omni.usd
@@ -18,7 +17,7 @@ APPROACH_HEIGHT = 0.15
 # fr3_hand_tcp is the lowest point when gripper faces down.
 # Fingers are ~4.5cm above TCP. For the fingers to straddle the
 # cube center, TCP must go to cube_center_z or slightly below.
-GRASP_Z_OFFSET = -0.005       # TCP goes 5mm below cube center
+GRASP_Z_OFFSET = -0.005  # TCP goes 5mm below cube center
 PLACE_OFFSET_Y = 0.4
 CONVERGE_THRESH = 0.035
 CONVERGE_FRAMES = 10
@@ -26,7 +25,7 @@ GRIPPER_OPEN = 0.04
 GRIPPER_CLOSE = 0.0
 GRIPPER_WAIT = 40
 GRASP_ROT = np.array([0.0, 1.0, 0.0, 0.0])
-WARMUP_FRAMES = 30            # frames to wait for physics to settle
+WARMUP_FRAMES = 30  # frames to wait for physics to settle
 
 # ── States ──────────────────────────────────────────────────
 WARMUP = 0
@@ -41,9 +40,20 @@ DESCEND_PLACE = 8
 RELEASE = 9
 RETREAT = 10
 DONE = 11
-_SNAME = ["WARMUP", "INIT", "OPEN_GRIPPER", "APPROACH_PICK", "DESCEND_PICK",
-          "CLOSE_GRIPPER", "LIFT", "APPROACH_PLACE", "DESCEND_PLACE",
-          "RELEASE", "RETREAT", "DONE"]
+_SNAME = [
+    "WARMUP",
+    "INIT",
+    "OPEN_GRIPPER",
+    "APPROACH_PICK",
+    "DESCEND_PICK",
+    "CLOSE_GRIPPER",
+    "LIFT",
+    "APPROACH_PLACE",
+    "DESCEND_PLACE",
+    "RELEASE",
+    "RETREAT",
+    "DONE",
+]
 
 # ── Persistent state ────────────────────────────────────────
 _state = WARMUP
@@ -85,11 +95,11 @@ def _ee():
 
 def _grip(val):
     from isaacsim.core.utils.types import ArticulationAction
+
     c = _robot.get_joint_positions().copy()
     c[-2] = val
     c[-1] = val
-    _robot.get_articulation_controller().apply_action(
-        ArticulationAction(joint_positions=c))
+    _robot.get_articulation_controller().apply_action(ArticulationAction(joint_positions=c))
 
 
 def _rmp_step():
@@ -101,8 +111,7 @@ def _rmp_step():
 
 def _aim(pos, rot=None):
     if _rmpflow is not None:
-        _rmpflow.set_end_effector_target(
-            target_position=pos, target_orientation=rot)
+        _rmpflow.set_end_effector_target(target_position=pos, target_orientation=rot)
 
 
 def _converged(tgt):
@@ -157,9 +166,10 @@ def compute(db=None):
         if _frame >= WARMUP_FRAMES:
             try:
                 from isaacsim.core.api import World
+
                 _world = World.instance()
                 if _world is None:
-                    _world = World(physics_dt=1.0/60.0, stage_units_in_meters=1.0)
+                    _world = World(physics_dt=1.0 / 60.0, stage_units_in_meters=1.0)
                 _world.initialize_physics()
                 _log("World + physics initialized")
                 _go(INIT)
@@ -172,8 +182,12 @@ def compute(db=None):
         try:
             from isaacsim.core.prims import SingleArticulation
             from isaacsim.robot_motion.motion_generation import (
-                LulaKinematicsSolver, RmpFlow, ArticulationKinematicsSolver,
-                ArticulationMotionPolicy, interface_config_loader)
+                ArticulationKinematicsSolver,
+                ArticulationMotionPolicy,
+                LulaKinematicsSolver,
+                RmpFlow,
+                interface_config_loader,
+            )
 
             _robot = SingleArticulation(prim_path=ROBOT_PATH, name="franka_pp_sn")
             _robot.initialize()
@@ -181,13 +195,15 @@ def compute(db=None):
             cfg = interface_config_loader.load_supported_motion_policy_config("FR3", "RMPflow")
             _rmpflow = RmpFlow(**cfg)
             _art_policy = ArticulationMotionPolicy(
-                robot_articulation=_robot, motion_policy=_rmpflow, default_physics_dt=1/60.0)
+                robot_articulation=_robot, motion_policy=_rmpflow, default_physics_dt=1 / 60.0
+            )
 
             ik_cfg = interface_config_loader.load_supported_lula_kinematics_solver_config("FR3")
             _art_ik = ArticulationKinematicsSolver(
                 robot_articulation=_robot,
                 kinematics_solver=LulaKinematicsSolver(**ik_cfg),
-                end_effector_frame_name="fr3_hand_tcp")
+                end_effector_frame_name="fr3_hand_tcp",
+            )
 
             _cube_pos = _get_cube()
             if _cube_pos is None:
@@ -198,11 +214,14 @@ def compute(db=None):
             _place_pos[1] += PLACE_OFFSET_Y
 
             ee = _ee()
-            _log(f"EE=[{ee[0]:.3f},{ee[1]:.3f},{ee[2]:.3f}] Cube=[{_cube_pos[0]:.3f},{_cube_pos[1]:.3f},{_cube_pos[2]:.3f}]")
+            _log(
+                f"EE=[{ee[0]:.3f},{ee[1]:.3f},{ee[2]:.3f}] Cube=[{_cube_pos[0]:.3f},{_cube_pos[1]:.3f},{_cube_pos[2]:.3f}]"
+            )
             _go(OPEN_GRIPPER)
         except Exception as e:
             _log(f"Init error: {e}")
             import traceback
+
             traceback.print_exc()
         return True
 
@@ -235,7 +254,7 @@ def compute(db=None):
         _frame += 1
         if _converged(_target):
             _grip(GRIPPER_CLOSE)
-            _log(f"Grasping at EE={np.round(_ee(),3).tolist()}")
+            _log(f"Grasping at EE={np.round(_ee(), 3).tolist()}")
             _go(CLOSE_GRIPPER)
         return True
 

@@ -29,8 +29,14 @@ import os
 TOOLS_DIR = os.path.join(os.path.dirname(__file__), "..", "isaac_mcp", "tools")
 
 EXPECTED_MODULES = [
-    "scene.py", "objects.py", "lighting.py", "robots.py",
-    "sensors.py", "materials.py", "assets.py", "simulation.py",
+    "scene.py",
+    "objects.py",
+    "lighting.py",
+    "robots.py",
+    "sensors.py",
+    "materials.py",
+    "assets.py",
+    "simulation.py",
 ]
 
 

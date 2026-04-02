@@ -22,6 +22,7 @@
 # SOFTWARE.
 
 """Command handler modules for the Isaac Sim extension."""
+
 from __future__ import annotations
 
 from typing import Any, Dict
@@ -36,7 +37,7 @@ def register_all_handlers(registry: Dict[str, Any], adapter: IsaacAdapterBase) -
         registry: Dict mapping command type strings to handler callables.
         adapter: IsaacAdapterBase instance for version-specific API calls.
     """
-    from . import scene, objects, lighting, robots, sensors, materials, assets, simulation
+    from . import assets, lighting, materials, objects, robots, scene, sensors, simulation
 
     for module in [scene, objects, lighting, robots, sensors, materials, assets, simulation]:
         module.register(registry, adapter)
