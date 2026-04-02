@@ -16,6 +16,11 @@
 
 | File | Action | Responsibility |
 |------|--------|---------------|
+| `LICENSE` | Modify | Add whats2000 copyright line |
+| `LICENSE_HEADER.py` | Modify | Update template header with dual copyright |
+| `add_license_headers.py` | Modify | Update embedded header + own file header |
+| `LICENSE_README.md` | Modify | Update example header |
+| All 38 `.py` source files | Modify | Update license headers via `add_license_headers.py` |
 | `pyproject.toml` | Create | Package metadata, build config, dependencies, entry point |
 | `ruff.toml` | Create | Linter/formatter configuration |
 | `.github/workflows/ci.yml` | Create | Lint + format checks on PRs |
@@ -26,7 +31,110 @@
 
 ---
 
-### Task 1: Create `pyproject.toml`
+### Task 1: Update license and copyright headers
+
+**Files:**
+- Modify: `LICENSE`
+- Modify: `LICENSE_HEADER.py`
+- Modify: `add_license_headers.py`
+- Modify: `LICENSE_README.md`
+- Modify: All `.py` source files (via script)
+
+- [ ] **Step 1: Update `LICENSE`**
+
+Change the copyright section from:
+```
+Copyright (c) 2025 omni-mcp
+```
+to:
+```
+Copyright (c) 2023-2025 omni-mcp
+Copyright (c) 2026 whats2000
+```
+
+- [ ] **Step 2: Update `LICENSE_HEADER.py` template**
+
+Change the copyright line from:
+```python
+# Copyright (c) 2023-2025 omni-mcp
+```
+to:
+```python
+# Copyright (c) 2023-2025 omni-mcp
+# Copyright (c) 2026 whats2000
+```
+
+Do this for BOTH occurrences in the file (the header itself and the example block).
+
+- [ ] **Step 3: Update `add_license_headers.py`**
+
+Update the file's own license header (line 4) from:
+```python
+# Copyright (c) 2023-2025 omni-mcp
+```
+to:
+```python
+# Copyright (c) 2023-2025 omni-mcp
+# Copyright (c) 2026 whats2000
+```
+
+Also update the `LICENSE_HEADER` string variable (line 33) from:
+```python
+# Copyright (c) 2023-2025 omni-mcp
+```
+to:
+```python
+# Copyright (c) 2023-2025 omni-mcp
+# Copyright (c) 2026 whats2000
+```
+
+- [ ] **Step 4: Update `LICENSE_README.md`**
+
+Change the copyright line in the example header from:
+```python
+# Copyright (c) 2023-2025 omni-mcp
+```
+to:
+```python
+# Copyright (c) 2023-2025 omni-mcp
+# Copyright (c) 2026 whats2000
+```
+
+- [ ] **Step 5: Run the license header script to update all source files**
+
+Run:
+```bash
+python add_license_headers.py .
+```
+
+This will update the `has_license` check to find existing headers and the script will skip files that already have the header. Since the embedded `LICENSE_HEADER` string changed, any file whose header doesn't match will be updated.
+
+Note: The script skips files that already have `MIT License` and `Copyright` in the first 500 chars. Since the existing headers match this check, we need to manually update the copyright line in all source files. The simplest approach is a `sed` replace across all `.py` files:
+
+```bash
+find isaac_mcp/ isaac.sim.mcp_extension/ tests/ -name "*.py" -exec sed -i 's/# Copyright (c) 2023-2025 omni-mcp/# Copyright (c) 2023-2025 omni-mcp\n# Copyright (c) 2026 whats2000/' {} +
+```
+
+- [ ] **Step 6: Verify a few files have the updated header**
+
+Run:
+```bash
+head -5 isaac_mcp/server.py
+head -5 isaac_mcp/connection.py
+head -5 isaac.sim.mcp_extension/isaac_sim_mcp_extension/extension.py
+```
+Expected: Each file shows both copyright lines.
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add -A
+git commit -m "license: add whats2000 copyright for fork continuation"
+```
+
+---
+
+### Task 2: Create `pyproject.toml`
 
 **Files:**
 - Create: `pyproject.toml`
@@ -47,6 +155,7 @@ license = "MIT"
 requires-python = ">=3.10"
 authors = [
     { name = "omni-mcp" },
+    { name = "whats2000" },
 ]
 keywords = ["mcp", "isaac-sim", "robotics", "simulation", "nvidia"]
 classifiers = [
@@ -100,7 +209,7 @@ git commit -m "build: add pyproject.toml for PyPI packaging"
 
 ---
 
-### Task 2: Create `ruff.toml`
+### Task 3: Create `ruff.toml`
 
 **Files:**
 - Create: `ruff.toml`
@@ -136,7 +245,7 @@ git commit -m "build: add ruff configuration for linting and formatting"
 
 ---
 
-### Task 3: Bump version to `0.4.0`
+### Task 4: Bump version to `0.4.0`
 
 **Files:**
 - Modify: `isaac_mcp/__init__.py:29`
@@ -169,7 +278,7 @@ git commit -m "release: bump version to 0.4.0"
 
 ---
 
-### Task 4: Fix existing lint issues
+### Task 5: Fix existing lint issues
 
 **Files:**
 - Modify: files flagged by ruff (varies)
@@ -205,7 +314,7 @@ git commit -m "style: fix lint and format issues in isaac_mcp"
 
 ---
 
-### Task 5: Create CI workflow
+### Task 6: Create CI workflow
 
 **Files:**
 - Create: `.github/workflows/ci.yml`
@@ -255,7 +364,7 @@ git commit -m "ci: add lint and format checks on PRs"
 
 ---
 
-### Task 6: Create CD workflow
+### Task 7: Create CD workflow
 
 **Files:**
 - Create: `.github/workflows/release.yml`
@@ -338,7 +447,7 @@ git commit -m "cd: add tag-triggered PyPI publish and GitHub Release"
 
 ---
 
-### Task 7: Create Smithery manifest
+### Task 8: Create Smithery manifest
 
 **Files:**
 - Create: `smithery.yaml`
@@ -374,7 +483,7 @@ git commit -m "build: add Smithery registry manifest"
 
 ---
 
-### Task 8: Update README with PyPI badge and install instructions
+### Task 9: Update README with PyPI badge and install instructions
 
 **Files:**
 - Modify: `README.md`
@@ -419,7 +528,7 @@ git commit -m "docs: add PyPI badge and pip install instructions to README"
 
 ---
 
-### Task 9: Configure PyPI trusted publisher
+### Task 10: Configure PyPI trusted publisher
 
 This task is manual — it cannot be automated via code. It must be done BEFORE the first tag push.
 
@@ -442,7 +551,7 @@ This task is manual — it cannot be automated via code. It must be done BEFORE 
 
 ---
 
-### Task 10: Test the full pipeline
+### Task 11: Test the full pipeline
 
 - [ ] **Step 1: Verify the build works end-to-end locally**
 

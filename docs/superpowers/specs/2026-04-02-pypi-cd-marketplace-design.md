@@ -13,7 +13,15 @@ Release `isaac-sim-mcp` to PyPI and multiple MCP registries (Smithery, mcp.run, 
 - The Omniverse extension (`isaac.sim.mcp_extension/`) is NOT part of the PyPI package; it is installed separately inside Isaac Sim
 - Versioning continues from `0.3.0` (next release: `0.4.0`)
 
-## 1. Python Packaging (`pyproject.toml`)
+## 1. License Update
+
+This is a fork of `omni-mcp/isaac-sim-mcp` (no longer maintained). The license is updated to:
+- Preserve original copyright: `Copyright (c) 2023-2025 omni-mcp`
+- Add fork maintainer copyright: `Copyright (c) 2026 whats2000`
+- Update all 42 source file headers with dual copyright lines
+- Update `LICENSE`, `LICENSE_HEADER.py`, `add_license_headers.py`, and `LICENSE_README.md`
+
+## 2. Python Packaging (`pyproject.toml`)
 
 - **PyPI package name:** `isaac-sim-mcp`
 - **Import name:** `isaac_mcp` (unchanged)
@@ -24,7 +32,7 @@ Release `isaac-sim-mcp` to PyPI and multiple MCP registries (Smithery, mcp.run, 
 - **Entry point:** `isaac-sim-mcp = isaac_mcp.server:main` (CLI command)
 - **Included packages:** Only `isaac_mcp/` -- the extension is excluded
 
-## 2. CI Pipeline (PRs to `main`)
+## 3. CI Pipeline (PRs to `main`)
 
 **File:** `.github/workflows/ci.yml`
 **Trigger:** Pull requests to `main`
@@ -38,7 +46,7 @@ Release `isaac-sim-mcp` to PyPI and multiple MCP registries (Smithery, mcp.run, 
 
 No tests in CI (documented limitation -- requires Isaac Sim).
 
-## 3. CD Pipeline (Tag-Triggered Release)
+## 4. CD Pipeline (Tag-Triggered Release)
 
 **File:** `.github/workflows/release.yml`
 **Trigger:** Push of tag matching `v*` (e.g., `v0.4.0`)
@@ -62,7 +70,7 @@ git push origin main --tags
 # 3. GitHub Actions handles build, publish, and release creation
 ```
 
-## 4. Registry Manifest Files
+## 5. Registry Manifest Files
 
 ### Smithery (`smithery.yaml`)
 
@@ -82,7 +90,7 @@ A `mcp-registry.json` file at the repo root (best-effort, format may evolve) wit
 
 Currently documented via `claude mcp add` in the README. A formal manifest will be added when the Claude Code registry spec stabilizes.
 
-## 5. Metadata (Shared Across Registries)
+## 6. Metadata (Shared Across Registries)
 
 - **Name:** `isaac-sim-mcp`
 - **Description:** "Control NVIDIA Isaac Sim robotics simulator through MCP -- 39 tools for scene management, robot control, sensors, and simulation"
@@ -90,7 +98,7 @@ Currently documented via `claude mcp add` in the README. A formal manifest will 
 - **Homepage:** GitHub repo URL
 - **License:** MIT
 
-## 6. File Changes
+## 7. File Changes
 
 ### New Files
 
@@ -106,6 +114,11 @@ Currently documented via `claude mcp add` in the README. A formal manifest will 
 
 | File | Change |
 |------|--------|
+| `LICENSE` | Add whats2000 copyright line |
+| `LICENSE_HEADER.py` | Update template with dual copyright |
+| `add_license_headers.py` | Update embedded header + own file header |
+| `LICENSE_README.md` | Update example header |
+| All `.py` source files | Update license headers with dual copyright |
 | `isaac_mcp/__init__.py` | Bump `__version__` to `0.4.0` |
 | `README.md` | Add PyPI badge, `pip install` instructions, registry links |
 
