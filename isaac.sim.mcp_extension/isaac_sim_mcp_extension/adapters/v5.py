@@ -391,17 +391,17 @@ class IsaacAdapterV5(IsaacAdapterBase):
         has_collision = prim.HasAPI(UsdPhysics.CollisionAPI)
         result["collision_enabled"] = has_collision
 
-        # Get velocities via PhysX if simulation is running
-        try:
-            import omni.physx
-            physx_interface = omni.physx.get_physx_interface()
-            linear_vel = physx_interface.get_rigidbody_linear_velocity(prim_path)
-            angular_vel = physx_interface.get_rigidbody_angular_velocity(prim_path)
-            result["linear_velocity"] = list(linear_vel) if linear_vel else [0.0, 0.0, 0.0]
-            result["angular_velocity"] = list(angular_vel) if angular_vel else [0.0, 0.0, 0.0]
-        except Exception:
-            # Velocities not available when simulation isn't running
-            if has_rb:
+        # Get velocities from USD RigidBodyAPI attributes (updated during simulation)
+        if has_rb:
+            try:
+                rb_api = UsdPhysics.RigidBodyAPI(prim)
+                vel_attr = rb_api.GetVelocityAttr()
+                ang_vel_attr = rb_api.GetAngularVelocityAttr()
+                vel = vel_attr.Get() if vel_attr else None
+                ang_vel = ang_vel_attr.Get() if ang_vel_attr else None
+                result["linear_velocity"] = list(vel) if vel else [0.0, 0.0, 0.0]
+                result["angular_velocity"] = list(ang_vel) if ang_vel else [0.0, 0.0, 0.0]
+            except Exception:
                 result["linear_velocity"] = [0.0, 0.0, 0.0]
                 result["angular_velocity"] = [0.0, 0.0, 0.0]
 
