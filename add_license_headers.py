@@ -2,6 +2,7 @@
 # MIT License
 #
 # Copyright (c) 2023-2025 omni-mcp
+# Copyright (c) 2026 whats2000
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +32,7 @@ import sys
 LICENSE_HEADER = """# MIT License
 #
 # Copyright (c) 2023-2025 omni-mcp
+# Copyright (c) 2026 whats2000
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
