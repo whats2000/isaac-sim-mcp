@@ -279,6 +279,15 @@ class IsaacAdapterV5(IsaacAdapterBase):
         current_positions = art.get_joint_positions()
         current_pos_list = current_positions.tolist() if current_positions is not None else []
 
+        # Get runtime target positions (from applied actions, not USD defaults)
+        runtime_targets = []
+        try:
+            applied_action = art.get_applied_action()
+            if applied_action and applied_action.joint_positions is not None:
+                runtime_targets = applied_action.joint_positions.tolist()
+        except Exception:
+            pass  # Fall back to USD values if articulation controller unavailable
+
         joints_info = []
 
         # Walk descendants to find joint prims
@@ -310,6 +319,7 @@ class IsaacAdapterV5(IsaacAdapterBase):
                         target_attr = drive_api.GetTargetPositionAttr()
                         joint_data["stiffness"] = stiffness_attr.Get() if stiffness_attr else None
                         joint_data["damping"] = damping_attr.Get() if damping_attr else None
+                        # USD default as fallback
                         joint_data["target_position"] = target_attr.Get() if target_attr else None
                         break
 
@@ -319,8 +329,14 @@ class IsaacAdapterV5(IsaacAdapterBase):
                     idx = joint_names.index(joint_name)
                     if idx < len(current_pos_list):
                         joint_data["actual_position"] = current_pos_list[idx]
-                        if joint_data.get("target_position") is not None:
-                            joint_data["position_error"] = joint_data["target_position"] - current_pos_list[idx]
+
+                    # Override target_position with runtime value if available
+                    if idx < len(runtime_targets):
+                        joint_data["target_position"] = float(runtime_targets[idx])
+
+                    # Calculate position_error using (possibly runtime) target
+                    if joint_data.get("target_position") is not None and "actual_position" in joint_data:
+                        joint_data["position_error"] = joint_data["target_position"] - joint_data["actual_position"]
 
                 joints_info.append(joint_data)
 
