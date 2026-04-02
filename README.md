@@ -1,5 +1,7 @@
 # Isaac Sim MCP Server
 
+<!-- mcp-name: io.github.whats2000/isaacsim-mcp-server -->
+
 [![PyPI version](https://img.shields.io/pypi/v/isaacsim-mcp-server)](https://pypi.org/project/isaacsim-mcp-server/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

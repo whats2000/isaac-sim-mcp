@@ -76,5 +76,8 @@ local_cache/
 mcp_cache/
 .coverage
 
+# MCP Registry tokens
+.mcpregistry_*
+
 # Don't ignore demo usd files
 !demo/*usd
