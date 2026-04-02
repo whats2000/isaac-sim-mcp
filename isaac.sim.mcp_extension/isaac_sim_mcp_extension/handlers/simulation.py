@@ -162,7 +162,7 @@ def _ensure_log_listener():
             if len(_log_buffer) > _MAX_LOG_BUFFER:
                 _log_buffer.pop(0)
 
-    logger.set_channel_enabled("*", omni.log.SettingBehavior.OVERRIDE, True)
+    logger.set_channel_enabled("*", True, omni.log.SettingBehavior.OVERRIDE)
     logger.add_log_callback(_on_log)
     _log_listener_active = True
 
