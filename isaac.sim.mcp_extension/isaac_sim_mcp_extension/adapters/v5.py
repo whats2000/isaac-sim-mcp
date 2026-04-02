@@ -379,10 +379,10 @@ class IsaacAdapterV5(IsaacAdapterBase):
         try:
             import omni.physx
             physx_interface = omni.physx.get_physx_interface()
-            rigid_body_handle = physx_interface.get_rigidbody_transformation(prim_path)
-            if rigid_body_handle:
-                result["linear_velocity"] = list(rigid_body_handle.get("linear_velocity", [0, 0, 0]))
-                result["angular_velocity"] = list(rigid_body_handle.get("angular_velocity", [0, 0, 0]))
+            linear_vel = physx_interface.get_rigidbody_linear_velocity(prim_path)
+            angular_vel = physx_interface.get_rigidbody_angular_velocity(prim_path)
+            result["linear_velocity"] = list(linear_vel) if linear_vel else [0.0, 0.0, 0.0]
+            result["angular_velocity"] = list(angular_vel) if angular_vel else [0.0, 0.0, 0.0]
         except Exception:
             # Velocities not available when simulation isn't running
             if has_rb:
