@@ -2,6 +2,7 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/isaac-sim-mcp)](https://pypi.org/project/isaac-sim-mcp/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![MCP Quality](https://archestra.ai/mcp-catalog/api/badge/quality/whats2000/isaac-sim-mcp)](https://archestra.ai/mcp-catalog/api/badge/quality/whats2000/isaac-sim-mcp)
 
 Natural language control for NVIDIA Isaac Sim through the Model Context Protocol (MCP).
 
