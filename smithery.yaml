@@ -1,0 +1,17 @@
+name: isaac-sim-mcp
+description: Control NVIDIA Isaac Sim robotics simulator through MCP -- 39 tools for scene management, robot control, sensors, and simulation
+license: MIT
+homepage: https://github.com/omni-mcp/isaac-sim-mcp
+
+install:
+  pip: isaac-sim-mcp
+
+start:
+  command: isaac-sim-mcp
+
+tags:
+  - robotics
+  - simulation
+  - nvidia
+  - isaac-sim
+  - 3d
