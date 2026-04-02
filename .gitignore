@@ -75,3 +75,6 @@ local_cache/
 # MCP specific
 mcp_cache/
 .coverage
+
+# Don't ignore demo usd files
+!demo/*usd
