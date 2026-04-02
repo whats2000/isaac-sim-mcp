@@ -155,7 +155,7 @@ def _ensure_log_listener():
     logger = omni.log.get_log()
 
     def _on_log(source, level, filename, function_name, module_name, line, message, pid, tid, timestamp):
-        if level >= omni.log.Level.WARN:
+        if level.value >= omni.log.Level.WARN.value:
             level_name = "WARN" if level == omni.log.Level.WARN else "ERROR"
             entry = f"[{level_name}] [{source}] {message}"
             _log_buffer.append(entry)
