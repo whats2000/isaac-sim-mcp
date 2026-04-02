@@ -93,7 +93,7 @@ def execute_script(adapter: IsaacAdapterBase, code: Optional[str] = None, cwd: O
         if not code:
             return {"status": "error", "message": "code is required"}
         result = adapter.execute_script(code, cwd=cwd)
-        return {"status": "success", "result": result}
+        return {"status": "success", **result}
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
@@ -131,7 +131,7 @@ def reload_script_handler(adapter: IsaacAdapterBase, file_path: Optional[str] = 
         if not file_path:
             return {"status": "error", "message": "file_path is required"}
         result = adapter.reload_script(file_path, module_name=module_name)
-        return {"status": "success", "result": result}
+        return {"status": "success", **result}
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
