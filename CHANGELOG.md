@@ -8,17 +8,68 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- Updated package name and version in extension.toml
+- Added new application icon and social badge image
+
+## [0.4.1] - 2026-04-02
+
+### Changed
+- Added MCP registry metadata (`server.json`) for marketplace listing
+- Fixed demo GIF URL in README to use absolute GitHub raw URL
+
+## [0.4.0] - 2026-04-02
+
+### Added
+- **Observability tools**: `get_simulation_state`, `get_physics_state`, `get_joint_config`, `get_isaac_logs`, `reload_script`
+- **Step-and-observe**: `observe` parameters on `step_simulation` for combined stepping and inspection (issue #8)
+- `cwd` parameter and stdout/stderr capture for `execute_script`
+- Franka pick-and-place demo scene and USD file
+- Development wrapper for MCP server with hot-reloading support
+- Environment discovery and loading tools
+- Dynamic robot discovery from Isaac Sim asset server
+- PyPI packaging via `pyproject.toml` — installable with `pip install isaacsim-mcp-server`
+- Tag-triggered PyPI publish and GitHub Release CD pipeline
+- Smithery registry manifest
+- CI lint and format checks on PRs (ruff)
+- Desktop launcher instructions and scripts
+- Documentation for running multiple Isaac Sim instances with MCP
+
+### Changed
+- **Renamed package** from `isaac-sim-mcp` to `isaacsim-mcp-server` across all references
+- Complete modular architecture rewrite:
+  - Extracted `IsaacConnection` into dedicated connection module
+  - Added adapter layer with base ABC and v5 implementation
+  - Split into 8 handler modules with 31+ command handlers
+  - Split into 8 MCP tool modules with 31+ tools
+  - Rewrote `server.py` as slim entry point using modular tools
+  - Rewrote `extension.py` as slim registry-based command router
+  - Extracted socket server from `extension.py`
+- Added type hints across all handler, adapter, and connection modules
+- Migrated all imports from `omni.isaac.*` to `isaacsim.*` for Isaac Sim 5.1.0 compatibility
 - Refreshed project documentation to reflect the current Isaac Sim `5.1.0`-focused architecture
 - Reworked the README with a clearer quickstart, architecture overview, and example prompting workflow
-- Updated documentation to match the modular MCP server and extension layout used by the current codebase
+- Updated build scripts to use installed `isaacsim-mcp-server` CLI
+- Added MIT License to all source files; updated copyright headers for fork continuation
+- Now documents `39` MCP tools across `8` categories
 
-### Documented
-- `35` MCP tools across `8` categories
-- Adapter-based version isolation for Isaac Sim `5.1.0`
-- Environment discovery, robot library refresh, and newer simulation control workflows
+### Fixed
+- Correct argument order in `set_channel_enabled` (issue #2 bug 1)
+- Use PhysX velocity API for accurate runtime readings (issue #2 bug 2)
+- Read runtime joint targets from articulation controller (issue #2 bug 3)
+- Flatten `execute_script` and `reload_script` response structure (issue #2 bug 4)
+- Use `add_message_consumer` API for Isaac Sim 5.1 log listener
+- Compare log level enum by value for Isaac Sim 5.1 compatibility
+- Use USD `RigidBodyAPI` velocity attrs instead of missing PhysX methods
+- Initialize `SingleArticulation` before accessing controller APIs
+- `scene.clear` now removes all user prims including root-level ones
+- Fix transform precision conflict and URDF file validation
+- Remove dead code and fix adapter bypass in handlers
 
+### Tests
+- Added 43 integration tests for all tool categories
+- Updated structural tests for new observability methods
 
-## [0.3.0] - 2024-04-22
+## [0.3.0] - 2025-04-22
 
 ### Added
 - USD asset search integration with `search_3d_usd_by_text` tool
@@ -39,7 +90,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Position and scale customization for USD models
 - Better compatibility with Isaac Sim's native USD handling
 
-## [0.2.1] - 2024-04-15
+## [0.2.1] - 2025-04-15
 
 ### Added
 - Beaver3D integration for 3D model generation from text prompts and images
