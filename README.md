@@ -51,6 +51,15 @@ cd isaacsim-mcp-server
 | NVIDIA Isaac Sim | `5.1.0` |
 | Python | `3.10+` |
 | `uv` | latest (for source install) |
+| Platform | Linux (Ubuntu 22.04+) |
+
+> [!NOTE]
+> Currently only **Linux** is supported. Windows support is planned.
+> macOS is not supported because NVIDIA Isaac Sim does not run on macOS.
+
+> [!INFO]
+> We are welcoming contributions to support other Isaac Sim versions. 
+> The adapter layer is designed for easy version isolation.
 
 ---
 
