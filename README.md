@@ -358,10 +358,15 @@ This creates a launcher that auto-assigns ports, waits for the extension socket,
 A ready-to-run demo at `demo/franka_pick_place.py` using RMPflow for motion planning:
 
 ```text
-1. Create a physics scene, ground plane, and a Franka FR3 robot
-2. Add two tables and a small cube on the first table
-3. Use `create_action_graph` to wire OnPlaybackTick → ScriptNode with the pick-and-place script
-4. Press Play -- the robot picks the cube and places it on the second table
+Create a physics scene with a ground plane, then spawn a Franka FR3 robot at the origin.
+
+Add two textured tables with a ~0.8m gap along X. Place a small textured cube with physics enabled on top of the first table.
+
+Use `create_action_graph` to wire `OnPlaybackTick` → `ScriptNode`, and write a pick-and-place controller script using RMPflow for motion planning. Save the script to the `demo/` directory.
+
+Use `get_prim_info` to query actual positions and sizes of the tables and cube before writing the controller — do not hardcode coordinates.
+
+Start the simulation with Play. The robot should pick the cube from table 1 and place it on table 2. Verify the process using `step_simulation` with `observe_prims` on the cube to confirm it reaches table 2.
 ```
 
 Uses `create_action_graph` for Action Graph wiring, plus the observability tools: `get_joint_config`, `step_simulation` with `observe_prims`, `get_physics_state`, and `reload_script`.
