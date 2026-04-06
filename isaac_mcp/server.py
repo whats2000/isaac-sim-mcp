@@ -55,27 +55,68 @@ async def server_lifespan(server: FastMCP) -> AsyncIterator[Dict[str, Any]]:
         logger.info("IsaacMCP server shut down")
 
 
+_INSTRUCTIONS = """\
+Isaac Sim integration through the Model Context Protocol.
+
+## MCP Tools vs Scripts / Action Graphs
+
+MCP tools operate BETWEEN simulation frames (editor-level):
+- Scene setup: create_physics_scene, create_object, create_robot, load_environment
+- Inspection: get_prim_info, get_robot_info, get_physics_state, get_joint_config
+- Stepping: step_simulation (advance N frames and observe state)
+- Joint control: set_joint_positions, get_joint_positions
+- Diagnostics: get_isaac_logs, get_simulation_state
+
+Scripts and Action Graphs operate WITHIN simulation frames (runtime-level):
+- Real-time control loops and physics callbacks
+- IK solvers, trajectory planners, state machines
+- Sensor data processing pipelines
+Use execute_script for one-off setup, or write a .py file and load it with reload_script.
+
+## Workflow
+
+### Scene Setup
+1. get_scene_info — verify connection
+2. create_physics_scene — physics + ground plane
+3. create_robot / create_object / load_environment — populate scene
+4. get_prim_info — verify positions and actual sizes
+
+### Debug Loop (step-and-observe)
+1. set_joint_positions — command the robot
+2. step_simulation with observe_prims and observe_joints — advance and read state
+3. If drives misbehave → get_joint_config (check stiffness, damping, position error)
+4. If objects misbehave → get_physics_state (check collision, mass, rigid body)
+5. If anything errors → get_isaac_logs
+6. Adjust and repeat
+
+Do NOT use play_simulation + sleep + execute_script as a debug loop.
+Use step_simulation for controlled, observable stepping.
+
+### Controller Development
+1. Write controller as a .py file (state machine, IK, physics callbacks)
+2. reload_script to load it into Isaac Sim
+3. step_simulation to debug the behavior step-by-step
+4. Edit the file, reload_script again to iterate
+5. play_simulation once the controller works correctly
+
+### Tool Priority
+Always prefer named tools over execute_script:
+- Reading joints → get_joint_positions (not execute_script)
+- Inspecting prims → get_prim_info (not execute_script)
+- Checking physics → get_physics_state (not execute_script)
+- Checking drives → get_joint_config (not execute_script)
+- Checking logs → get_isaac_logs (not execute_script)
+
+execute_script is the escape hatch for operations no named tool covers.
+"""
+
 mcp = FastMCP(
     "IsaacSimMCP",
-    instructions="Isaac Sim integration through the Model Context Protocol",
+    instructions=_INSTRUCTIONS,
     lifespan=server_lifespan,
 )
 
 register_all_tools(mcp, get_isaac_connection)
-
-
-@mcp.prompt()
-def asset_creation_strategy() -> str:
-    """Defines the preferred strategy for creating assets in Isaac Sim"""
-    return """
-    0. Before anything, always check the scene with get_scene_info() to verify connection and get the assets root path.
-    1. If the scene is empty, create a physics scene with create_physics_scene().
-    2. If execute_script fails due to communication error, retry up to 3 times.
-    3. Use create_robot() as the first attempt for robot creation before falling back to execute_script().
-    4. Use create_light() to add lighting to the scene.
-    5. Use create_object() for primitive shapes, create_material() + apply_material() for appearance.
-    6. Use play_simulation() / stop_simulation() to control the simulation lifecycle.
-    """
 
 
 def main():
