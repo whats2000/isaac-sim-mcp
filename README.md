@@ -362,7 +362,7 @@ Please use the Isaac MCP tool complete this:
 
 Create a physics scene with a ground plane, then spawn a Franka FR3 robot at the origin.
 
-Add two textured tables with a gap along X. Place a small textured cube with physics enabled on top of the first table.
+Add two textured tables with a gap along Y. Place a small textured cube with physics enabled on top of the first table.
 
 Use `create_action_graph` to wire `OnPlaybackTick` → `ScriptNode`, and write a pick-and-place controller script using RMPflow for motion planning. Save the script to the `demo/` directory.
 
