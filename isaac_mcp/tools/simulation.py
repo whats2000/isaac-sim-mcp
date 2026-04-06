@@ -68,12 +68,23 @@ def register_tools(mcp: FastMCP, get_connection: "Callable[[], IsaacConnection]"
     def step_simulation(
         num_steps: int = 1, observe_prims: Optional[List[str]] = None, observe_joints: Optional[List[str]] = None
     ) -> str:
-        """Step the simulation forward by N frames, optionally observing prim and joint states after stepping.
+        """Step the simulation forward by N frames, then observe prim and joint states.
+
+        This is the primary tool for debugging robot behavior. Use it instead of
+        play_simulation + sleep + execute_script. The observe parameters let you
+        inspect positions, velocities, and joint states in a single call.
+
+        Typical debug loop:
+          1. set_joint_positions to command the robot
+          2. step_simulation with observe_prims and observe_joints
+          3. get_joint_config if drives are not tracking correctly
+          4. get_physics_state if objects are not behaving as expected
+          5. Adjust and repeat
 
         Args:
             num_steps: Number of simulation frames to step.
-            observe_prims: Optional list of prim paths to observe (returns position + velocity).
-            observe_joints: Optional list of articulation prim paths to observe (returns joint positions).
+            observe_prims: List of prim paths to observe (returns position + velocity).
+            observe_joints: List of articulation prim paths to observe (returns joint positions).
         """
         try:
             conn = get_connection()
@@ -114,8 +125,11 @@ def register_tools(mcp: FastMCP, get_connection: "Callable[[], IsaacConnection]"
 
     @mcp.tool("get_isaac_logs")
     def get_isaac_logs(clear: bool = True, count: int = 100) -> str:
-        """Get recent warning and error log messages from the Isaac Sim console.
-        Use this to diagnose simulation errors, physics warnings, and script failures.
+        """Diagnostic tool: get recent warnings and errors from the Isaac Sim console.
+
+        Call this after any tool returns an error, after simulation behavior is unexpected,
+        or after execute_script / reload_script fails. Helps diagnose physics warnings,
+        collision issues, and script errors that are not surfaced in tool responses.
 
         Args:
             clear: Clear the log buffer after reading. Default True.
@@ -130,7 +144,9 @@ def register_tools(mcp: FastMCP, get_connection: "Callable[[], IsaacConnection]"
 
     @mcp.tool("get_simulation_state")
     def get_simulation_state() -> str:
-        """Get the current simulation state including timeline status, simulation time, and physics dt."""
+        """Get the current simulation state including timeline status (playing/stopped/paused),
+        simulation time, and physics dt. Call this to verify the simulation is running before
+        using step_simulation."""
         try:
             conn = get_connection()
             result = conn.send_command("simulation.get_state")
@@ -140,7 +156,13 @@ def register_tools(mcp: FastMCP, get_connection: "Callable[[], IsaacConnection]"
 
     @mcp.tool("get_physics_state")
     def get_physics_state(prim_path: str) -> str:
-        """Get physics state for a prim including rigid body status, mass, velocities, kinematic flag, and collision info.
+        """Diagnostic tool: get physics state for a prim.
+
+        Returns rigid body status, mass, velocities, kinematic flag, and collision info.
+        Call this when:
+        - Objects fall through the ground (check collision enabled)
+        - Objects don't move when expected (check is_kinematic, mass)
+        - Grasping fails (check collision on gripper fingers and target object)
 
         Args:
             prim_path: USD path to the prim to inspect.
@@ -154,7 +176,13 @@ def register_tools(mcp: FastMCP, get_connection: "Callable[[], IsaacConnection]"
 
     @mcp.tool("get_joint_config")
     def get_joint_config(prim_path: str) -> str:
-        """Get joint drive configuration for a robot articulation including stiffness, damping, limits, target vs actual positions, and position error.
+        """Diagnostic tool: get joint drive configuration for a robot articulation.
+
+        Returns stiffness, damping, limits, target vs actual positions, and position error
+        for each joint. Call this when:
+        - Joint drives are not tracking targets (check position_error)
+        - Joints are oscillating or unstable (check stiffness/damping ratio)
+        - Joints hit limits unexpectedly (check lower_limit/upper_limit)
 
         Args:
             prim_path: USD path to the robot articulation root.
@@ -168,8 +196,18 @@ def register_tools(mcp: FastMCP, get_connection: "Callable[[], IsaacConnection]"
 
     @mcp.tool("execute_script")
     def execute_script(code: str, cwd: Optional[str] = None) -> str:
-        """Execute arbitrary Python code in Isaac Sim. Use as an escape hatch for operations not covered by other tools.
-        Always verify connection with get_scene_info before executing. Print the code in chat before running for review.
+        """Escape hatch: execute arbitrary Python code in Isaac Sim.
+
+        PREFER named tools over this for: reading/setting joints (set_joint_positions,
+        get_joint_positions), inspecting state (get_prim_info, get_physics_state,
+        get_joint_config), stepping simulation (step_simulation), and checking logs
+        (get_isaac_logs).
+
+        USE this for: operations no named tool covers, such as creating Action Graphs,
+        computing IK, setting up physics callbacks, or configuring advanced USD properties.
+
+        For persistent controllers (>20 lines), write a .py file and load it with
+        reload_script instead of pasting code here.
 
         Args:
             code: Python code to execute in the Isaac Sim context.
@@ -187,10 +225,16 @@ def register_tools(mcp: FastMCP, get_connection: "Callable[[], IsaacConnection]"
 
     @mcp.tool("reload_script")
     def reload_script(file_path: str, module_name: Optional[str] = None) -> str:
-        """Reload a Python script or module into Isaac Sim. Auto-adds the file's directory to sys.path.
+        """Load a Python controller or module into Isaac Sim from a file on disk.
 
-        If module_name is provided, reloads that module (or imports it if not yet loaded).
-        If only file_path is provided, executes the file contents directly (hot-patch).
+        Use this instead of execute_script for persistent controllers, state machines,
+        or any code longer than ~20 lines. Workflow:
+          1. Write the controller as a .py file
+          2. reload_script to load it into Isaac Sim
+          3. step_simulation to debug the behavior
+          4. Edit the file and reload_script again to iterate
+
+        The file's directory is auto-added to sys.path.
 
         Args:
             file_path: Path to the Python file on disk.
