@@ -160,6 +160,14 @@ def create(
             result["num_dof"] = info.get("num_dof", 0)
         except Exception:
             pass
+        # Check for broken drive configs (zero stiffness + zero damping)
+        try:
+            joint_config = adapter.get_joint_config(prim_path)
+            warnings = joint_config.get("warnings", [])
+            if warnings:
+                result["warnings"] = warnings
+        except Exception:
+            pass
         return result
     except Exception as e:
         return {"status": "error", "message": str(e)}

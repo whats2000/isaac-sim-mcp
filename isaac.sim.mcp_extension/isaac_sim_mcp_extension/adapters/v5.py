@@ -596,11 +596,25 @@ class IsaacAdapterV5(IsaacAdapterBase):
 
                 joints_info.append(joint_data)
 
-        return {
+        # Warn about joints with zero stiffness (broken drive config)
+        warnings = []
+        for j in joints_info:
+            stiff = j.get("stiffness")
+            damp = j.get("damping")
+            if stiff is not None and stiff == 0 and (damp is None or damp == 0):
+                warnings.append(
+                    f"Joint '{j['name']}' has stiffness=0 and damping=0 — "
+                    f"its drive is effectively disabled and will not respond to position targets."
+                )
+
+        result: Dict[str, Any] = {
             "prim_path": prim_path,
             "joint_count": len(joints_info),
             "joints": joints_info,
         }
+        if warnings:
+            result["warnings"] = warnings
+        return result
 
     # ── Physics ────────────────────────────────────────────
 
