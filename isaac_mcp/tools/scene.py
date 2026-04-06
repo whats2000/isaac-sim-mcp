@@ -96,7 +96,11 @@ def register_tools(mcp: FastMCP, get_connection: "Callable[[], IsaacConnection]"
 
     @mcp.tool("get_prim_info")
     def get_prim_info(prim_path: str) -> str:
-        """Get detailed information about a specific prim including type, transform, and children.
+        """Get detailed information about a specific prim.
+
+        Returns type, world-space position, and children. For geometric prims
+        (Cube, Sphere, Cylinder, Cone, Capsule), also returns actual_size [x, y, z]
+        in meters accounting for scale and default primitive dimensions.
 
         Args:
             prim_path: The USD prim path to inspect.

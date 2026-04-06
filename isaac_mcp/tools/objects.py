@@ -44,7 +44,14 @@ def register_tools(mcp: FastMCP, get_connection: "Callable[[], IsaacConnection]"
         physics_enabled: bool = False,
         prim_path: Optional[str] = None,
     ) -> str:
-        """Create a primitive object in the scene.
+        """Create a primitive object (Cube, Sphere, Cylinder, Cone, Capsule, Plane).
+
+        The scale parameter multiplies the primitive's default size. For example,
+        a Cube has default size 2.0, so scale=[0.5, 0.5, 0.5] creates a 1.0m cube.
+
+        Returns prim_path, actual_size [x, y, z] in meters, and bounding_box
+        (min/max corners in world coordinates) so you can accurately place other
+        objects relative to this one (e.g. placing a cube on top of a table).
 
         Args:
             object_type: Type of primitive — Cube, Sphere, Cylinder, Cone, Capsule, or Plane.
