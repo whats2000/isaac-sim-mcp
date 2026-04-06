@@ -83,7 +83,7 @@ If you installed from source:
 You should see in the logs:
 
 ```
-Registered 40 command handlers
+Registered 41 command handlers
 Isaac Sim MCP server started on localhost:8766
 ```
 
