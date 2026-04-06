@@ -107,8 +107,9 @@ from isaac_sim_mcp_extension.adapters import get_adapter
 from isaac_sim_mcp_extension.handlers import register_all_handlers
 
 import gc
+from isaac_sim_mcp_extension.extension import MCPExtension
 for obj in gc.get_objects():
-    if hasattr(obj, \"_registry\") and hasattr(obj, \"_adapter\") and hasattr(obj, \"_server\"):
+    if isinstance(obj, MCPExtension):
         adapter = get_adapter()
         # Use __dict__ to bypass pybind11 __setattr__ on omni.ext.IExt subclasses
         obj.__dict__[\"_adapter\"] = adapter
@@ -117,7 +118,7 @@ for obj in gc.get_objects():
         print(f\"Hot-reloaded {len(obj._registry)} handlers\")
         break
 else:
-    print(\"WARNING: Could not find extension instance for hot-reload\")
+    print(\"WARNING: Could not find MCPExtension instance for hot-reload\")
 '''
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
