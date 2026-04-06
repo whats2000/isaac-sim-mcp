@@ -148,12 +148,19 @@ def create(
         if position:
             xform = adapter.create_xform_prim(prim_path)
             xform.set_world_pose(position=np.array(position))
-        return {
+        result = {
             "status": "success",
             "message": f"Created {match['description']} robot",
             "prim_path": prim_path,
             "robot_key": match["key"],
         }
+        try:
+            info = adapter.get_robot_joint_info(prim_path)
+            result["joint_names"] = info.get("joint_names", [])
+            result["num_dof"] = info.get("num_dof", 0)
+        except Exception:
+            pass
+        return result
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
