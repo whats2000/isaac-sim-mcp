@@ -268,6 +268,30 @@ class IsaacAdapterBase(ABC):
 
     # ── Simulation ─────────────────────────────────────────
 
+    def _ensure_physics_world(self) -> None:
+        """Ensure a World with initialised physics exists.
+
+        Called by play() and create_action_graph() to guarantee that
+        SingleArticulation.initialize() works inside ScriptNode scripts.
+
+        The default implementation uses isaacsim.core.api.World (Isaac Sim 5.x).
+        Override in version-specific adapters if the API differs.
+        """
+        try:
+            from isaacsim.core.api import World
+
+            world = World.instance()
+            if world is None:
+                world = World(
+                    physics_dt=1.0 / 60.0,
+                    rendering_dt=1.0 / 60.0,
+                    stage_units_in_meters=1.0,
+                )
+            if world.physics_sim_view is None:
+                world.initialize_physics()
+        except ImportError:
+            pass  # Non-v5 runtimes may not have isaacsim.core.api
+
     @abstractmethod
     def play(self) -> None:
         """Start the simulation."""
