@@ -64,9 +64,14 @@ def create_physics(
 ) -> Dict[str, Any]:
     try:
         scene_path = adapter.create_physics_scene(gravity=gravity, scene_name=scene_name)
-        # Create ground plane
+        # Create ground plane with collision so objects don't fall through
         floor_path = "/World/groundPlane"
         adapter.create_prim(floor_path, "Plane")
+        from pxr import UsdPhysics
+        stage = adapter.get_stage()
+        gp = stage.GetPrimAtPath(floor_path)
+        if gp.IsValid() and not gp.HasAPI(UsdPhysics.CollisionAPI):
+            UsdPhysics.CollisionAPI.Apply(gp)
         return {"status": "success", "message": f"Physics scene created at {scene_path}"}
     except Exception as e:
         return {"status": "error", "message": str(e)}
