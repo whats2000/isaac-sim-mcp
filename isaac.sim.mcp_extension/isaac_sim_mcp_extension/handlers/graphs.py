@@ -60,19 +60,17 @@ def create_action_graph(
                 node_type = n.get("type", "")
                 if not node_path or not node_type:
                     return {"status": "error", "message": f"Each node needs 'path' and 'type', got: {n}"}
-                og_nodes.append((node_type, node_path))
+                og_nodes.append((node_path, node_type))
 
-        # Convert connection pairs: resolve relative paths to absolute graph paths
+        # Convert connection pairs (relative paths are resolved by og.Controller)
         og_connections = []
         if connections:
             for conn in connections:
                 if len(conn) != 2:
                     return {"status": "error", "message": f"Each connection must be [source, target], got: {conn}"}
-                src = f"{graph_path}/{conn[0]}" if not conn[0].startswith("/") else conn[0]
-                tgt = f"{graph_path}/{conn[1]}" if not conn[1].startswith("/") else conn[1]
-                og_connections.append((src, tgt))
+                og_connections.append((conn[0], conn[1]))
 
-        # Convert value dicts: resolve relative attr paths
+        # Convert value dicts (relative attr paths are resolved by og.Controller)
         og_values = []
         if values:
             for v in values:
@@ -80,8 +78,7 @@ def create_action_graph(
                 val = v.get("value")
                 if not attr:
                     return {"status": "error", "message": f"Each value entry needs 'attr', got: {v}"}
-                full_attr = f"{graph_path}/{attr}" if not attr.startswith("/") else attr
-                og_values.append((full_attr, val))
+                og_values.append((attr, val))
 
         # Build and execute the graph edit
         keys = og.Controller.Keys

@@ -85,13 +85,13 @@ import importlib, os, glob
 
 # Clear stale .pyc for ALL loaded isaac_sim_mcp_extension modules so
 # importlib.reload() picks up the latest source.
-for mod_name, mod in list(__import__("sys").modules.items()):
-    if mod_name.startswith("isaac_sim_mcp_extension"):
-        src = getattr(mod, "__file__", None)
-        if src and src.endswith(".py"):
-            cache_dir = os.path.join(os.path.dirname(src), "__pycache__")
+for mod_name, mod in list(__import__(\"sys\").modules.items()):
+    if mod_name.startswith(\"isaac_sim_mcp_extension\"):
+        src = getattr(mod, \"__file__\", None)
+        if src and src.endswith(\".py\"):
+            cache_dir = os.path.join(os.path.dirname(src), \"__pycache__\")
             base = os.path.splitext(os.path.basename(src))[0]
-            for pyc in glob.glob(os.path.join(cache_dir, base + ".*.pyc")):
+            for pyc in glob.glob(os.path.join(cache_dir, base + \".*.pyc\")):
                 try:
                     os.remove(pyc)
                 except OSError:
