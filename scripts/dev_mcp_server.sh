@@ -110,7 +110,8 @@ import gc
 for obj in gc.get_objects():
     if hasattr(obj, \"_registry\") and hasattr(obj, \"_adapter\") and hasattr(obj, \"_server\"):
         adapter = get_adapter()
-        obj._adapter = adapter
+        # Use __dict__ to bypass pybind11 __setattr__ on omni.ext.IExt subclasses
+        obj.__dict__[\"_adapter\"] = adapter
         obj._registry.clear()
         register_all_handlers(obj._registry, adapter)
         print(f\"Hot-reloaded {len(obj._registry)} handlers\")
