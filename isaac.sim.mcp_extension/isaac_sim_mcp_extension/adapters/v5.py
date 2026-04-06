@@ -460,6 +460,7 @@ class IsaacAdapterV5(IsaacAdapterBase):
         """Get joint names, trying articulation API first then USD fallback."""
         from isaacsim.core.prims import SingleArticulation
 
+        self._ensure_physics_world()
         art = SingleArticulation(prim_path=prim_path)
         try:
             art.initialize()
@@ -484,6 +485,9 @@ class IsaacAdapterV5(IsaacAdapterBase):
     def get_joint_positions(self, prim_path: str) -> List[float]:
         from isaacsim.core.prims import SingleArticulation
 
+        # Ensure physics is initialized so SingleArticulation.initialize() works
+        self._ensure_physics_world()
+
         art = SingleArticulation(prim_path=prim_path)
         try:
             art.initialize()
@@ -494,6 +498,7 @@ class IsaacAdapterV5(IsaacAdapterBase):
             pass
 
         # Fallback: read drive target positions from USD
+        # WARNING: these are authored targets, not actual physics positions
         from pxr import Usd, UsdPhysics
 
         stage = self.get_stage()
@@ -524,6 +529,7 @@ class IsaacAdapterV5(IsaacAdapterBase):
         from isaacsim.core.prims import SingleArticulation
         from pxr import Usd, UsdPhysics
 
+        self._ensure_physics_world()
         stage = self.get_stage()
         prim = stage.GetPrimAtPath(prim_path)
         if not prim.IsValid():
