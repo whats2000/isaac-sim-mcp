@@ -960,6 +960,9 @@ class IsaacAdapterV5(IsaacAdapterBase):
         finally:
             sys.stdout, sys.stderr = old_stdout, old_stderr
 
+    # Track exec() namespaces to clean up subscriptions on reload
+    _exec_namespaces: Dict[str, dict] = {}
+
     def reload_script(self, file_path: str, module_name: Optional[str] = None) -> Dict[str, Any]:
         import importlib
         import io
@@ -970,6 +973,17 @@ class IsaacAdapterV5(IsaacAdapterBase):
         parent_dir = os.path.dirname(os.path.abspath(file_path))
         if parent_dir not in sys.path:
             sys.path.insert(0, parent_dir)
+
+        # Clean up previous exec() namespace for this file (unsubscribe orphaned callbacks)
+        abs_path = os.path.abspath(file_path)
+        old_ns = self._exec_namespaces.get(abs_path)
+        if old_ns:
+            for key, val in old_ns.items():
+                if hasattr(val, "unsubscribe"):
+                    try:
+                        val.unsubscribe()
+                    except Exception:
+                        pass
 
         # Capture stdout/stderr
         old_stdout, old_stderr = sys.stdout, sys.stderr
@@ -1004,6 +1018,8 @@ class IsaacAdapterV5(IsaacAdapterBase):
                     "__file__": file_path,
                 }
                 exec(code, local_ns)
+                # Track namespace so we can clean up subscriptions on next reload
+                self._exec_namespaces[abs_path] = local_ns
                 msg = f"Script '{os.path.basename(file_path)}' executed successfully"
 
             return {
