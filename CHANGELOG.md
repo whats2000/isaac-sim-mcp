@@ -5,6 +5,19 @@ All notable changes to the isaacsim-mcp-server project will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1] - 2026-04-06
+
+### Added
+- **`edit_action_graph` tool**: Modify attribute values and add connections on existing Action Graphs. Uses `og.Controller.set()` for ScriptNode `usePath`/`scriptPath` attributes (matching the pattern from `omni.graph.scriptnode` official tests). Auto-resets `state:omni_initialized` when script content or path changes to force ScriptNode reload
+- **`script_file` parameter on `create_action_graph`**: One-step convenience for the common OnPlaybackTick → ScriptNode workflow. Automatically creates nodes, wires connections, and attaches the script file — replaces the previous two-step create + edit pattern
+- **`prim_path` parameter on `create_robot`**: Explicit USD prim path control (e.g. `/World/Franka`) instead of name-based path derivation. Solves the common issue where robots are created at `/{Name}` but scripts expect `/World/{Name}`
+- ScriptNode workflow documentation in MCP server instructions covering one-step (`script_file`) and two-step (`create` + `edit`) patterns, script reload via `edit_action_graph`, and `setup(db)`/`compute(db)` function requirements
+
+### Changed
+- `create_action_graph` docstring updated with `script_file` example and inline/file-based usage patterns
+- `create_robot` docstring updated with `prim_path` parameter documentation
+- Tool count updated to 42 across 9 categories
+
 ## [0.5.0] - 2026-04-06
 
 ### Added

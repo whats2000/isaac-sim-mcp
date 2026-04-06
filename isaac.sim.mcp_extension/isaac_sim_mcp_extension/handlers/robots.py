@@ -129,6 +129,7 @@ def create(
     robot_type: str = "franka",
     position: Optional[Sequence[float]] = None,
     name: Optional[str] = None,
+    prim_path: Optional[str] = None,
 ) -> Dict[str, Any]:
     try:
         match = _find_robot(adapter, robot_type)
@@ -142,8 +143,9 @@ def create(
 
         assets_root = adapter.get_assets_root_path()
         asset_path = assets_root + match["asset_path"]
-        prim_name = name or match["key"].capitalize()
-        prim_path = f"/{prim_name}"
+        if prim_path is None:
+            prim_name = name or match["key"].capitalize()
+            prim_path = f"/{prim_name}"
         adapter.add_reference_to_stage(asset_path, prim_path)
         if position:
             xform = adapter.create_xform_prim(prim_path)

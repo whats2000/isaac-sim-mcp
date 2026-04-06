@@ -100,6 +100,20 @@ Use step_simulation for controlled, observable stepping.
 4. Edit the file, reload_script again to iterate
 5. play_simulation once the controller works correctly
 
+### ScriptNode with File-Based Scripts
+For controllers that run every tick via Action Graph ScriptNode:
+
+**One-step** (recommended): use script_file parameter:
+  create_action_graph(script_file="/path/to/controller.py")
+
+**Two-step** (manual): create graph, then attach script file:
+  1. create_action_graph with OnPlaybackTick → ScriptNode nodes
+  2. edit_action_graph to set ScriptNode.inputs:usePath=true and ScriptNode.inputs:scriptPath
+
+The script file must define setup(db) and/or compute(db) functions.
+To reload after editing, call edit_action_graph with the same scriptPath — it auto-resets
+state:omni_initialized to force the ScriptNode to re-read the file.
+
 ### Tool Priority
 Always prefer named tools over execute_script:
 - Reading joints → get_joint_positions (not execute_script)

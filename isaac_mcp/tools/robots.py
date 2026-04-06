@@ -36,7 +36,10 @@ def register_tools(mcp: FastMCP, get_connection: "Callable[[], IsaacConnection]"
 
     @mcp.tool("create_robot")
     def create_robot(
-        robot_type: str = "franka", position: Optional[List[float]] = None, name: Optional[str] = None
+        robot_type: str = "franka",
+        position: Optional[List[float]] = None,
+        name: Optional[str] = None,
+        prim_path: Optional[str] = None,
     ) -> str:
         """Create a robot in the scene from the Isaac Sim asset library.
 
@@ -51,6 +54,7 @@ def register_tools(mcp: FastMCP, get_connection: "Callable[[], IsaacConnection]"
             robot_type: Robot name or search term. Fuzzy matched against available robots.
             position: [x, y, z] world position.
             name: Custom name for the robot prim.
+            prim_path: Exact USD prim path (e.g. "/World/Franka"). Overrides name-based path.
         """
         try:
             conn = get_connection()
@@ -59,6 +63,8 @@ def register_tools(mcp: FastMCP, get_connection: "Callable[[], IsaacConnection]"
                 params["position"] = position
             if name:
                 params["name"] = name
+            if prim_path:
+                params["prim_path"] = prim_path
             result = conn.send_command("robots.create", params)
             return json.dumps(result, indent=2)
         except Exception as e:

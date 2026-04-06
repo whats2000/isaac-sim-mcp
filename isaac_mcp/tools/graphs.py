@@ -41,6 +41,7 @@ def register_tools(mcp: FastMCP, get_connection: "Callable[[], IsaacConnection]"
         connections: Optional[List[List[str]]] = None,
         values: Optional[List[Dict[str, object]]] = None,
         evaluator: str = "push",
+        script_file: Optional[str] = None,
     ) -> str:
         """Create and wire an OmniGraph Action Graph.
 
@@ -59,36 +60,35 @@ def register_tools(mcp: FastMCP, get_connection: "Callable[[], IsaacConnection]"
                 - "attr": Full attribute path (e.g. "ScriptNode.inputs:script")
                 - "value": The value to set
             evaluator: Graph evaluator type (default "push").
+            script_file: Convenience shortcut — path to a local Python script file.
+                When provided, automatically creates OnPlaybackTick → ScriptNode nodes,
+                wires them, and attaches the script file (sets usePath + scriptPath).
+                The nodes and connections parameters are ignored when script_file is set.
 
         Example (inline script):
             create_action_graph(
-                graph_path="/World/ActionGraph",
-                nodes=[
-                    {"path": "OnPlaybackTick", "type": "omni.graph.action.OnPlaybackTick"},
-                    {"path": "ScriptNode", "type": "omni.graph.scriptnode.ScriptNode"},
-                ],
-                connections=[
-                    ["OnPlaybackTick.outputs:tick", "ScriptNode.inputs:execIn"]
-                ],
                 values=[
                     {"attr": "ScriptNode.inputs:script", "value": "def compute(db): ..."}
                 ]
             )
 
-        Note: For ScriptNode with a file path, create the graph first, then use
-        edit_action_graph to set usePath and scriptPath — those attributes
-        require direct attribute setting (og.Controller.set) rather than
-        SET_VALUES during graph creation.
+        Example (script file — one-step):
+            create_action_graph(
+                script_file="/path/to/controller.py"
+            )
         """
         try:
             conn = get_connection()
             params: Dict[str, object] = {"graph_path": graph_path, "evaluator": evaluator}
-            if nodes is not None:
-                params["nodes"] = nodes
-            if connections is not None:
-                params["connections"] = connections
-            if values is not None:
-                params["values"] = values
+            if script_file is not None:
+                params["script_file"] = script_file
+            else:
+                if nodes is not None:
+                    params["nodes"] = nodes
+                if connections is not None:
+                    params["connections"] = connections
+                if values is not None:
+                    params["values"] = values
             result = conn.send_command("graphs.create_action_graph", params)
             return json.dumps(result, indent=2)
         except Exception as e:

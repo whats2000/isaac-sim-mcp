@@ -42,10 +42,24 @@ def create_action_graph(
     connections: Optional[List[List[str]]] = None,
     values: Optional[List[Dict[str, object]]] = None,
     evaluator: str = "push",
+    script_file: Optional[str] = None,
 ) -> Dict[str, Any]:
-    """Create an OmniGraph Action Graph with nodes, connections and values."""
+    """Create an OmniGraph Action Graph with nodes, connections and values.
+
+    When script_file is provided, automatically creates OnPlaybackTick → ScriptNode,
+    wires them, and attaches the script file via usePath + scriptPath.
+    """
     try:
         import omni.graph.core as og
+
+        # ── script_file shortcut: create standard ScriptNode graph ─
+        if script_file is not None:
+            nodes = [
+                {"path": "OnPlaybackTick", "type": "omni.graph.action.OnPlaybackTick"},
+                {"path": "ScriptNode", "type": "omni.graph.scriptnode.ScriptNode"},
+            ]
+            connections = [["OnPlaybackTick.outputs:tick", "ScriptNode.inputs:execIn"]]
+            values = None  # usePath/scriptPath set via direct attribute set below
 
         # Build og.Controller.Keys-based edit descriptor
         edit_kwargs: Dict[str, Any] = {
@@ -95,6 +109,17 @@ def create_action_graph(
         )
 
         created_node_paths = [n.get_prim_path() for n in new_nodes] if new_nodes else []
+
+        # ── script_file: attach file via direct attribute set ──────
+        if script_file is not None and graph is not None:
+            script_node = graph.get_node(f"{graph_path}/ScriptNode")
+            if script_node is not None and script_node.is_valid():
+                use_path_attr = script_node.get_attribute("inputs:usePath")
+                script_path_attr = script_node.get_attribute("inputs:scriptPath")
+                if use_path_attr is not None and use_path_attr.is_valid():
+                    og.Controller.set(use_path_attr, True)
+                if script_path_attr is not None and script_path_attr.is_valid():
+                    og.Controller.set(script_path_attr, script_file)
 
         return {
             "status": "success",

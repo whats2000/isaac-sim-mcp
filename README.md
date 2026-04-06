@@ -18,7 +18,7 @@ Connect any MCP-compatible IDE (Cursor, VS Code, Claude Code, Windsurf, JetBrain
 
 ## Highlights
 
-- **41 tools** across 9 categories -- scene, objects, lighting, robots, sensors, materials, assets, simulation, graphs
+- **42 tools** across 9 categories -- scene, objects, lighting, robots, sensors, materials, assets, simulation, graphs
 - **107+ robots** auto-discovered from the Isaac Sim asset library (Franka, UR, Unitree, Boston Dynamics, and more)
 - **Step-and-observe** debugging -- step the simulation and inspect prim positions, joint states, and physics in one call
 - **Hot-reload** -- iterate on Python controllers without restarting Isaac Sim
@@ -232,7 +232,7 @@ Handlers -> Adapter -> Isaac Sim 5.1.0 APIs
 
 ## Tools
 
-41 tools across 9 categories:
+42 tools across 9 categories:
 
 | Category | Count | What you can do |
 |----------|------:|-----------------|
@@ -243,7 +243,7 @@ Handlers -> Adapter -> Isaac Sim 5.1.0 APIs
 | **Sensors** | 4 | Create cameras/LiDAR, capture images, get point clouds |
 | **Materials** | 2 | Create and apply materials |
 | **Assets** | 4 | Import URDF, load/search USD, generate 3D models |
-| **Graphs** | 1 | Build Action Graphs programmatically (OnPlaybackTick, ScriptNode, etc.) |
+| **Graphs** | 2 | Build and edit Action Graphs (OnPlaybackTick, ScriptNode, script file attachment) |
 | **Simulation** | 11 | Play/pause/stop/step, execute Python, inspect physics, hot-reload |
 
 <details>
@@ -263,7 +263,7 @@ Handlers -> Adapter -> Isaac Sim 5.1.0 APIs
 
 **Assets:** `import_urdf` `load_usd` `search_usd` `generate_3d`
 
-**Graphs:** `create_action_graph`
+**Graphs:** `create_action_graph` `edit_action_graph`
 
 **Simulation:** `play_simulation` `pause_simulation` `stop_simulation` `step_simulation` `set_physics_params` `get_isaac_logs` `get_simulation_state` `get_physics_state` `get_joint_config` `execute_script` `reload_script`
 
@@ -371,7 +371,7 @@ Use `get_prim_info` to query actual positions and sizes of the tables and cube b
 Start the simulation with Play. The robot should pick the cube from table 1 and place it on table 2. Verify the process using `step_simulation` with `observe_prims` on the cube to confirm it reaches table 2.
 ```
 
-Uses `create_action_graph` for Action Graph wiring, plus the observability tools: `get_joint_config`, `step_simulation` with `observe_prims`, `get_physics_state`, and `reload_script`.
+Uses `create_action_graph` with `script_file` for one-step Action Graph + ScriptNode setup, plus the observability tools: `get_joint_config`, `step_simulation` with `observe_prims`, `get_physics_state`, and `edit_action_graph` for script hot-reload.
 
 ---
 
