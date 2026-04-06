@@ -665,16 +665,21 @@ class IsaacAdapterV5(IsaacAdapterBase):
         has_collision = prim.HasAPI(UsdPhysics.CollisionAPI)
         result["collision_enabled"] = has_collision
 
-        # Get velocities from USD RigidBodyAPI attributes (updated during simulation)
+        # Get velocities from PhysX runtime API (not USD attributes which may be stale)
         if has_rb:
             try:
-                rb_api = UsdPhysics.RigidBodyAPI(prim)
-                vel_attr = rb_api.GetVelocityAttr()
-                ang_vel_attr = rb_api.GetAngularVelocityAttr()
-                vel = vel_attr.Get() if vel_attr else None
-                ang_vel = ang_vel_attr.Get() if ang_vel_attr else None
-                result["linear_velocity"] = list(vel) if vel else [0.0, 0.0, 0.0]
-                result["angular_velocity"] = list(ang_vel) if ang_vel else [0.0, 0.0, 0.0]
+                import omni.physx
+
+                physx = omni.physx.get_physx_interface()
+                rb_data = physx.get_rigidbody_transformation(prim_path)
+                if rb_data and rb_data.get("ret_val", False):
+                    vel = rb_data.get("linear_velocity", (0.0, 0.0, 0.0))
+                    ang_vel = rb_data.get("angular_velocity", (0.0, 0.0, 0.0))
+                    result["linear_velocity"] = [float(vel[0]), float(vel[1]), float(vel[2])]
+                    result["angular_velocity"] = [float(ang_vel[0]), float(ang_vel[1]), float(ang_vel[2])]
+                else:
+                    result["linear_velocity"] = [0.0, 0.0, 0.0]
+                    result["angular_velocity"] = [0.0, 0.0, 0.0]
             except Exception:
                 result["linear_velocity"] = [0.0, 0.0, 0.0]
                 result["angular_velocity"] = [0.0, 0.0, 0.0]
@@ -875,8 +880,25 @@ class IsaacAdapterV5(IsaacAdapterBase):
                     prim_states.append({"prim_path": path, "error": "Prim not found"})
                     continue
                 state: Dict[str, Any] = {"prim_path": path}
-                transform = self.get_prim_transform(path)
-                state["position"] = transform.get("position", [0, 0, 0])
+                # Prefer PhysX runtime position for rigid bodies (always current)
+                if prim.HasAPI(UsdPhysics.RigidBodyAPI):
+                    try:
+                        import omni.physx
+
+                        physx = omni.physx.get_physx_interface()
+                        rb_data = physx.get_rigidbody_transformation(path)
+                        if rb_data and rb_data.get("ret_val", False):
+                            pos = rb_data["position"]
+                            state["position"] = [float(pos[0]), float(pos[1]), float(pos[2])]
+                        else:
+                            transform = self.get_prim_transform(path)
+                            state["position"] = transform.get("position", [0, 0, 0])
+                    except Exception:
+                        transform = self.get_prim_transform(path)
+                        state["position"] = transform.get("position", [0, 0, 0])
+                else:
+                    transform = self.get_prim_transform(path)
+                    state["position"] = transform.get("position", [0, 0, 0])
                 # Add velocity if rigid body
                 if prim.HasAPI(UsdPhysics.RigidBodyAPI):
                     try:
