@@ -68,8 +68,15 @@ wait_for_extension_socket() {
   done
 }
 
+# Clear stale .pyc files so importlib.reload() picks up the latest source.
+clear_pyc() {
+  find "$EXTENSION_DIR" -name '*.pyc' -delete 2>/dev/null
+  find "$EXTENSION_DIR" -name '__pycache__' -type d -empty -delete 2>/dev/null
+}
+
 # Send execute_script to Isaac Sim extension to reload handler modules in-place.
 hot_reload_extension() {
+  clear_pyc
   "$PYTHON_BIN" -c "
 import socket, json, sys
 
