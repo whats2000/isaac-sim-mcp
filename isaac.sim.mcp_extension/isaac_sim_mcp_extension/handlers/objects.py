@@ -55,6 +55,19 @@ def create(
         _prim = adapter.create_prim(prim_path, prim_type=object_type)
         if position or rotation or scale:
             adapter.set_prim_transform(prim_path, position=position, rotation=rotation, scale=scale)
+
+        # All objects get collision so they interact with the scene.
+        # physics_enabled additionally adds RigidBodyAPI for dynamic simulation.
+        from pxr import UsdPhysics
+
+        stage = adapter.get_stage()
+        prim = stage.GetPrimAtPath(prim_path)
+        if prim.IsValid():
+            if not prim.HasAPI(UsdPhysics.CollisionAPI):
+                UsdPhysics.CollisionAPI.Apply(prim)
+            if physics_enabled and not prim.HasAPI(UsdPhysics.RigidBodyAPI):
+                UsdPhysics.RigidBodyAPI.Apply(prim)
+
         response: Dict[str, Any] = {"status": "success", "message": f"Created {object_type}", "prim_path": prim_path}
         try:
             actual_size, (bbox_min, bbox_max) = adapter.get_prim_actual_size(prim_path)
