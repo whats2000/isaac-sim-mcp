@@ -30,6 +30,13 @@ dependencies = [
     "mcp[cli]",
 ]
 
+[dependency-groups]
+dev = [
+    "pre-commit",
+    "ruff",
+    "pytest",
+]
+
 [project.urls]
 Homepage = "https://github.com/whats2000/isaacsim-mcp-server"
 Repository = "https://github.com/whats2000/isaacsim-mcp-server"

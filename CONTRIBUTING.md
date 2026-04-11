@@ -34,7 +34,7 @@ Thank you for your interest in contributing to Isaac Sim MCP Server! We welcome 
    uv sync
    ```
 
-3. Install pre-commit hooks (if available):
+3. Install pre-commit hooks (runs Ruff lint and format on every commit):
 
    ```bash
    uv run pre-commit install
@@ -76,20 +76,35 @@ uv run ruff format .
    uv run ruff format .
    ```
 
-4. **Run the tests** (if applicable):
+4. **Run the tests**:
 
    ```bash
    uv run pytest
    ```
 
-5. **Push your branch** and open a Pull Request against `main`.
+5. **Test with a running Isaac Sim instance** (required):
 
-6. Fill in the PR template with a clear description of your changes.
+   Unit tests alone are **not sufficient**. You must open Isaac Sim and verify your changes work correctly in the simulator. Use the dev server with hot-reload to iterate quickly without restarting Isaac Sim:
+
+   ```bash
+   # Start Isaac Sim with the MCP extension enabled
+   ./scripts/run_isaac_sim.sh
+
+   # In a separate terminal, start the dev MCP server (watches for file changes)
+   ./scripts/dev_mcp_server.sh
+   ```
+
+   The dev server automatically hot-reloads extension handlers when files in `isaac.sim.mcp_extension/` change on disk, so you don't need to restart Isaac Sim between code changes.
+
+6. **Push your branch** and open a Pull Request against `main`.
+
+7. Fill in the PR template with a clear description of your changes.
 
 ### PR Guidelines
 
 - Keep PRs focused on a single change.
 - Include relevant tests for new features or bug fixes.
+- **Manually test your changes in a running Isaac Sim instance.** Specify which Isaac Sim version(s) you tested against in the PR.
 - Update documentation if your change affects user-facing behavior.
 - Link any related issues in the PR description.
 
@@ -112,7 +127,8 @@ If you're adding a new MCP tool:
 1. Create or update the appropriate file in `isaac_mcp/tools/`.
 2. Follow the existing tool patterns for consistency.
 3. Add tests for your new tool.
-4. Update the documentation to reflect the new capability.
+4. Verify the tool works in a running Isaac Sim instance using `scripts/dev_mcp_server.sh` for hot-reload.
+5. Update the documentation to reflect the new capability.
 
 ## License
 
